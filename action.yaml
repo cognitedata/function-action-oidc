@@ -1,0 +1,67 @@
+name: Function Action
+description: (re)deploy a Cognite Function with schedules
+inputs:
+    cdf_deployment_credentials:
+        description: CDF API key that is provided to the deployed function.
+        required: true
+    cdf_runtime_credentials:
+        description: CDF API key that will be used when function is running.
+        required: true
+    cdf_project:
+        description: The name of your cdf project. Will be checked that it matches given credentials.
+        required: false
+    cdf_base_url:
+        description: Base url of your cdf project.
+        default: https://api.cognitedata.com
+        required: false
+    function_name:
+        description: Name of function. Used as an external_id for created function. Should be unique within cdf project.
+        required: true
+    function_folder:
+        description: Path to the folder where the source code for the function(s) is/are located.
+        required: true
+    function_file:
+        description: Name of function file inside function folder, for instance, handler.py.
+        default: handler.py
+        required: false
+    function_secrets:
+        description: Base64 encoded string with secrets in json format.
+        required: false
+    schedule_file:
+        description: |
+            Relative path and name from (function_folder) of the file with schedules to be attached.
+            Not passing this parameter -> no schedules will be attached. If the passed file does not
+            exist, a warning will be issued, and no schedules will be attached. Note: On all deployments,
+            all existing schedules are deleted (and recreated if there are any)!
+        required: false
+    data_set_external_id:
+        description: Data set external ID to use for the function-associated file (zipped code folder).
+        required: false
+    common_folder:
+        description: |
+            Directory which contains code used by multiple functions. If not specified, will default
+            to 'common' (if it exists).
+        required: false
+    remove_only:
+        description: Removes the function and all schedules linked to it
+        default: false
+        required: false
+    remove_schedules:
+        description: Cleans up all the schedule linked to a function
+        default: true
+        required: false
+    cpu:
+        description: Set number of CPU cores per function, e.g. 0.5.
+        required: false
+    memory:
+        description: Set memory per function measured in GB, e.g. 0.8.
+        required: false
+    owner:
+        description: Set owner of a function, e.g. "forge".
+        required: false
+outputs:
+    function_external_id: # id of output
+        description: The External ID of the function output. Use this to do calls against the API!
+runs:
+    using: docker
+    image: Dockerfile

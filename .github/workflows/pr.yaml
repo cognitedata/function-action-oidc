@@ -1,0 +1,39 @@
+name: Build PR
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      name: Checkout code
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip poetry
+        poetry config virtualenvs.create false
+        poetry install
+
+    - name: Check codestyle
+      run: |
+        poetry run black --check .
+        poetry run isort --check-only .
+
+    - name: Check application security
+      run: |
+        poetry run bandit -r . -s B101,B322
+
+    - name: Run tests
+      run: |
+        PYTHONPATH=src poetry run pytest -v --cov-report xml:coverage.xml --cov=src
+        coverage xml
