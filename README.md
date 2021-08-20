@@ -1,3 +1,5 @@
+# NOT UPDATE TO OIDC VERSION
+
 # Deploy Cognite Function action
 This action deploys a Python function to Cognite Functions, optionally with schedule(s).
 
@@ -22,7 +24,7 @@ Example: if your code has to read assets, and write to timeseries, it will need 
 8. `cpu`: Set fractional number of CPU cores per function. See defaults and allowed values in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
 9. `memory`: Set memory per function measured in GB. See defaults and allowed values in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
 10. `owner`: Used to specify a function's owner. See allowed number of characters in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions)
-11. `remove_schedules`: Removes all the schedules linked to a function. 
+11. `remove_schedules`: Removes all the schedules linked to a function.
 
 ### Schedule file format
 ```yaml

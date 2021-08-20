@@ -1,38 +1,56 @@
-name: Function Action
-description: (re)deploy a Cognite Function with schedules
+name: Function Action OIDC
+description: Deploy a Cognite Function with schedules using OIDC
 inputs:
-    cdf_deployment_credentials:
-        description: CDF API key that is provided to the deployed function.
+    deployment_client_secret:
+        description: Client secret to be used for deployment of the function.
         required: true
-    cdf_runtime_credentials:
-        description: CDF API key that will be used when function is running.
+    deployment_client_id:
+        description: Client ID to be used for deployment of the function.
         required: true
+    deployment_tenant_id:
+        description: Tenant ID to be used for deployment of the function.
+        required: true
+    schedules_client_secret:
+        description: |
+            [Optional] If function is to be run with schedules, this is the
+            client secret to be used at runtime. Not providing this while also
+            passing schedules will cause an error to be raised.
+        required: false
+    schedules_client_id:
+        description: |
+            [Optional] If function is to be run with schedules, this is the
+            client ID to be used at runtime. Not providing this while also
+            passing schedules will cause an error to be raised.
+        required: false
     cdf_project:
-        description: The name of your cdf project. Will be checked that it matches given credentials.
+        description: The name of your CDF project.
+        required: true
+    cdf_cluster:
+        description: The cluster your customer's CDF project lives in.
+        default: westeurope-1
         required: false
-    cdf_base_url:
-        description: Base url of your cdf project.
-        default: https://api.cognitedata.com
-        required: false
-    function_name:
-        description: Name of function. Used as an external_id for created function. Should be unique within cdf project.
+    function_external_id:
+        description: |
+            External ID and name of function. Must be unique within the CDF project as this action
+            always overwrites existing.
         required: true
     function_folder:
-        description: Path to the folder where the source code for the function(s) is/are located.
+        description: Path to the folder where the source code for the function(s) can be found.
         required: true
     function_file:
         description: Name of function file inside function folder, for instance, handler.py.
         default: handler.py
         required: false
     function_secrets:
-        description: Base64 encoded string with secrets in json format.
+        description: Base64 encoded string of secrets in JSON format. See README/secrets.
         required: false
     schedule_file:
         description: |
             Relative path and name from (function_folder) of the file with schedules to be attached.
             Not passing this parameter -> no schedules will be attached. If the passed file does not
-            exist, a warning will be issued, and no schedules will be attached. Note: On all deployments,
-            all existing schedules are deleted (and recreated if there are any)!
+            exist, a warning will be issued, and no schedules will be attached. On all deployments,
+            all existing schedules are deleted (and recreated if there are any)! Note: Requires both
+            'schedules_client_secret' and 'schedules_client_id' to be passed!
         required: false
     data_set_external_id:
         description: Data set external ID to use for the function-associated file (zipped code folder).
@@ -41,14 +59,11 @@ inputs:
         description: |
             Directory which contains code used by multiple functions. If not specified, will default
             to 'common' (if it exists).
+        default: common
         required: false
     remove_only:
-        description: Removes the function and all schedules linked to it
+        description: Short-cut that ONLY removes the function (and all schedules linked) before quitting.
         default: false
-        required: false
-    remove_schedules:
-        description: Cleans up all the schedule linked to a function
-        default: true
         required: false
     cpu:
         description: Set number of CPU cores per function, e.g. 0.5.
@@ -57,11 +72,11 @@ inputs:
         description: Set memory per function measured in GB, e.g. 0.8.
         required: false
     owner:
-        description: Set owner of a function, e.g. "forge".
+        description: Set owner of a function, e.g. "My Client".
         required: false
 outputs:
     function_external_id: # id of output
-        description: The External ID of the function output. Use this to do calls against the API!
+        description: The external ID of the function.
 runs:
     using: docker
     image: Dockerfile
