@@ -33,7 +33,7 @@ def main(config: FunctionConfig) -> None:
         deploy_schedules(client, function, config.schedules)
     else:
         # If we did not remove existing schedules, we should also not add new ones. Warn if user gave any:
-        if (n_schedules := len(config.schedules)) :
+        if n_schedules := len(config.schedules):
             logger.warning(
                 f"Skipping step of deploying schedules ({n_schedules} were given). "
                 "Parameter 'remove_schedules=False' was passed, so this is to avoid creating duplicate schedules, "

@@ -26,4 +26,3 @@ humanize = "^3.11"
 pre-commit = "^2.14.0"
 
 [tool.poetry.dev-dependencies]
-bandit = "^1.7"
