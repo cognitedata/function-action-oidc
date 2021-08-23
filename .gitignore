@@ -141,5 +141,5 @@ cython_debug/
 .vscode
 .idea
 
-# Test function code
-test_functions
+# Pesky mac files:
+**/.DS_Store
