@@ -40,7 +40,7 @@ def await_function_deployment(client: CogniteClient, fn: Function, wait_time_sec
 def create_function_and_wait(client: CogniteClient, file_id: int, fn_config: FunctionConfig) -> Function:
     fn_xid = fn_config.external_id
     logger.info(f"Trying to create function '{fn_xid}'...")
-    if secrets := fn_config.unpacked_secrets:
+    if secrets := fn_config.secrets:
         logger.info(f"- With {len(secrets)} extra secret(s) named: {list(secrets)}")
     else:
         logger.info("- With no extra secrets")
