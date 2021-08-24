@@ -2,7 +2,7 @@ import ast
 import logging
 from pathlib import Path
 
-from config import FunctionConfig
+from configs import FunctionConfig
 
 logger = logging.getLogger(__name__)
 
