@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 # Pydantic fields:
 NonEmptyString = constr(min_length=1, strip_whitespace=True)  # type: ignore["valid-type"]
+NonEmptyStringMax128 = constr(min_length=1, max_length=128, strip_whitespace=True)
 
 
 @contextmanager

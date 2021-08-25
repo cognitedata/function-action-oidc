@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field, constr, root_validator, validator
 from schedula import FunctionSchedule
 from yaml import safe_load
 
-from utils import NonEmptyString, create_oidc_client, decode_and_parse, verify_path_is_directory
+from utils import NonEmptyString, NonEmptyStringMax128, create_oidc_client, decode_and_parse, verify_path_is_directory
 
 logger = logging.getLogger(__name__)
 
@@ -87,19 +87,20 @@ class FunctionConfig(GithubActionModel):
     data_set_external_id: Optional[str]
     cpu: Optional[float]
     memory: Optional[float]
-    owner: constr(min_length=1, max_length=128, strip_whitespace=True) = None
+    owner: Optional[NonEmptyStringMax128]
+    function_description: Optional[NonEmptyStringMax128]
 
-    @property
-    def secrets(self) -> Optional[Dict[str, str]]:
-        return self.function_secrets
-
-    def get_memory_and_cpu(self):
-        kw = {}
-        if self.memory is not None:
-            kw["memory"] = self.memory
-        if self.cpu is not None:
-            kw["cpu"] = self.cpu
-        return kw
+    def create_fn_params(self):
+        return {
+            "secrets": self.function_secrets,
+            "name": self.function_external_id,
+            "external_id": self.function_external_id,
+            "function_path": self.function_file,
+            "owner": self.owner,
+            "cpu": self.cpu,
+            "memory": self.memory,
+            "description": self.function_description,
+        }
 
     @validator("function_secrets")
     def validate_and_parse_secret(cls, value):
@@ -108,7 +109,10 @@ class FunctionConfig(GithubActionModel):
         try:
             return decode_and_parse(value)
         except Exception as e:
-            raise ValueError("Invalid secret, must be a valid base64 encoded JSON") from e
+            raise ValueError(
+                "Invalid secret, must be a valid base64 encoded JSON. See the README: "
+                "https://github.com/cognitedata/function-action-oidc#function-secrets"
+            ) from e
 
     @root_validator(skip_on_failure=True)
     def check_function_folders(cls, values):
@@ -124,8 +128,8 @@ class FunctionConfig(GithubActionModel):
 
 
 class RunConfig(BaseModel):
-    schedules_config: SchedulesConfig
-    fn_config: FunctionConfig
+    schedule: SchedulesConfig
+    function: FunctionConfig
 
     @staticmethod
     def verify_single_credential(cred_config, name):
@@ -141,21 +145,22 @@ class RunConfig(BaseModel):
 
     @root_validator(skip_on_failure=True)
     def verify_credentials(cls, values):
-        cls.verify_single_credential(values["fn_config"], name="deploy")
-        if values["schedules_config"].schedule_file is None:
-            cls.verify_single_credential(values["schedules_config"], name="schedule")
+        cls.verify_single_credential(values["function"], name="deploy")
+        if values["schedule"].schedule_file is None:
+            cls.verify_single_credential(values["schedule"], name="schedule")
 
     @root_validator(skip_on_failure=True)
     def verify_and_parse_schedules(cls, values) -> List[FunctionSchedule]:
-        if (schedule_file := values["schedules_config"].schedule_file) is None:
-            values["schedules_config"].schedules = []
+        if (schedule_file := values["schedule"].schedule_file) is None:
+            values["schedule"].schedules = []
             return values
 
-        path = values["fn_config"].function_folder / schedule_file
+        path = values["function"].function_folder / schedule_file
         if not path.is_file():
-            values["schedules_config"].schedule_file = None
+            values["schedule"].schedules = []
+            values["schedule"].schedule_file = None
             logger.warning(f"Ignoring given schedule file '{schedule_file}', path does not exist: {path.absolute()}")
         else:
             with path.open() as f:
-                values["schedules_config"].schedules = list(map(FunctionSchedule.parse_obj, safe_load(f)))
+                values["schedule"].schedules = list(map(FunctionSchedule.parse_obj, safe_load(f)))
         return values

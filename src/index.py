@@ -17,13 +17,13 @@ def main(
     config: RunConfig,
 ) -> None:
     # Run static analysis / other checks and pre-deployment verifications:
-    run_checks(config.fn_config)
+    run_checks(config.function)
 
     # Deploy code to Cognite Functions:
-    fn = upload_and_create_function(client, config.fn_config)
+    fn = upload_and_create_function(client, config.function)
 
     # Deploy schedules (if any):
-    deploy_schedules(client, fn, config.schedule_config)
+    deploy_schedules(client, fn, config.schedule)
 
     # Return output parameter (GitHub magic syntax):
     print(f"::set-output name=function_external_id::{fn.external_id}")
@@ -38,8 +38,8 @@ if __name__ == "__main__":
         remove_function_with_file(client, delete_config.function_external_id)
     else:
         config = RunConfig(
-            fn_config=FunctionConfig.from_envvars(),
-            schedule_config=SchedulesConfig.from_envvars(),
+            function=FunctionConfig.from_envvars(),
+            schedule=SchedulesConfig.from_envvars(),
         )
         # Function Action OIDC, assemble!!
         main(client, config)

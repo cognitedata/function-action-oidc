@@ -7,7 +7,7 @@ from retry import retry
 
 from configs import FunctionConfig
 from exceptions import FunctionDeployError
-from function import create_function_and_wait, delete_function
+from function import await_function_deployment, create_function_and_wait, delete_function
 from function_file import delete_function_file, zip_and_upload_folder
 from utils import create_zipfile_name
 
@@ -27,4 +27,5 @@ def upload_and_create_function(client: CogniteClient, fn_config: FunctionConfig)
     file_xid = create_zipfile_name(fn_xid)
 
     file_id = zip_and_upload_folder(client, fn_config, file_xid)
-    return create_function_and_wait(client, file_id, fn_config)
+    fn_under_deployment = create_function_and_wait(client, file_id, fn_config)
+    await_function_deployment(client, fn_under_deployment)

@@ -11,23 +11,32 @@ from exceptions import FunctionDeployError, FunctionDeployTimeout
 logger = logging.getLogger(__name__)
 
 
+WAIT_TIME_SEC = 1200  # 20 minutes
+
+
 class FunctionStatus:
     # Not an exhaustive list, only what's needed:
     FAILED = "Failed"
     READY = "Ready"
 
 
-def await_function_deployment(client: CogniteClient, fn: Function, wait_time_sec: int = 1200) -> Function:
-    t0 = time.time()
-    while time.time() <= t0 + wait_time_sec:
+def await_function_deployment(client: CogniteClient, fn: Function, wait_time_sec: int = WAIT_TIME_SEC) -> Function:
+    deploy_time = time.time()
+    next_info_log = deploy_time + 90  # Log progress every 90 sec
+    while (now := time.time()) <= deploy_time + wait_time_sec:
+        elapsed_time = precisedelta(now - deploy_time)
         if fn.status == FunctionStatus.READY:
-            logger.info(f"Function deployment successful! Deployment took {precisedelta(time.time()-t0)}")
+            logger.info(f"Function deployment successful! Deployment took {elapsed_time}")
             return fn
 
         elif fn.status == FunctionStatus.FAILED:
             err_msg = f"Error message: {fn.error['message']}.\nTrace: {fn.error['trace']}"
-            logger.warning(f"Deployment failed after {precisedelta(time.time()-t0)}! {err_msg}")
+            logger.warning(f"Deployment failed after {elapsed_time}! {err_msg}")
             raise FunctionDeployError(err_msg)
+
+        elif now > next_info_log:
+            next_info_log += 90
+            logger.info(f"Function deployment in progress... Elapsed time: {elapsed_time}")
 
         time.sleep(5)
         fn.update()
@@ -37,24 +46,17 @@ def await_function_deployment(client: CogniteClient, fn: Function, wait_time_sec
     raise FunctionDeployTimeout(err)
 
 
-def create_function_and_wait(client: CogniteClient, file_id: int, fn_config: FunctionConfig) -> Function:
-    fn_xid = fn_config.external_id
+def create_function(client: CogniteClient, file_id: int, fn_config: FunctionConfig) -> Function:
+    fn_xid = fn_config.function_external_id
     logger.info(f"Trying to create function '{fn_xid}'...")
-    if secrets := fn_config.secrets:
+    if secrets := fn_config.function_secrets:
         logger.info(f"- With {len(secrets)} extra secret(s) named: {list(secrets)}")
     else:
         logger.info("- With no extra secrets")
-    fn = client.functions.create(
-        name=fn_xid,
-        external_id=fn_xid,
-        file_id=file_id,
-        function_path=fn_config.function_file,
-        secrets=secrets,
-        owner=fn_config.owner,
-        **fn_config.get_memory_and_cpu(),  # Only pass mem/cpu if set to not overwrite defaults
-    )
-    logging.info(f"Function '{fn_xid}' created (ID: {fn.id}). Waiting for deployment...")
-    return await_function_deployment(client, fn)
+
+    fn = client.functions.create(file_id=file_id, **fn_config.create_fn_params())
+    logging.info(f"Function '{fn_xid}' created successfully! (ID: {fn.id}).")
+    return fn
 
 
 def delete_function(client: CogniteClient, xid: str):

@@ -29,7 +29,7 @@ inputs:
             will cause an error to be raised.
         required: false
     cdf_project:
-        description: The name of your CDF project. If given, will be checked against credentials.
+        description: The name of your CDF project.
         required: false
     cdf_cluster:
         description: The cluster your customer's CDF project lives in.
@@ -68,17 +68,22 @@ inputs:
         default: common
         required: false
     remove_only:
-        description: Short-cut that ONLY removes the function (and all schedules linked) before quitting.
+        description: |
+            Short-cut that ONLY removes the function (and all schedules linked) before quitting. Only
+            requires deployment credentials and 'function_external_id' to be passed.
         default: false
         required: false
     cpu:
-        description: Set number of CPU cores per function, e.g. 0.5.
+        description: 'Set number of CPU cores per function, e.g. 0.5. NB: Ignored for CDF projects on Azure!'
         required: false
     memory:
-        description: Set memory per function measured in GB, e.g. 0.8.
+        description: 'Set memory per function measured in GB, e.g. 0.8. NB: Ignored for CDF projects on Azure!'
         required: false
     owner:
         description: Set owner of a function, e.g. "My Client".
+        required: false
+    function_description:
+        description: Set description field of a function, e.g. "This does X for Y if Z".
         required: false
 outputs:
     function_external_id:  # id of output
