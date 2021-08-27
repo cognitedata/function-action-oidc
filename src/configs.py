@@ -1,16 +1,21 @@
 import logging
 from contextlib import suppress
-from inspect import signature
 from os import getenv
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from cognite.client.exceptions import CogniteAPIError
 from pydantic import BaseModel, Field, constr, root_validator, validator
-from schedula import FunctionSchedule
-from yaml import safe_load
+from yaml import safe_load  # type: ignore
 
-from utils import NonEmptyString, NonEmptyStringMax128, create_oidc_client, decode_and_parse, verify_path_is_directory
+from access import verify_capabilites, verify_credentials_vs_project
+from schedule import FunctionSchedule
+from utils import (
+    NonEmptyString,
+    NonEmptyStringMax128,
+    create_oidc_client_from_dct,
+    decode_and_parse,
+    verify_path_is_directory,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -38,34 +43,42 @@ class DeleteFunctionConfig(GithubActionModel):
         return self.remove_only
 
 
-class CredentialsMixin:
+class CredentialsModel(BaseModel):
     @property
     def credentials(self) -> Dict[str, str]:
         return self.dict(include={"client_id", "client_secret"})
 
     @property
     def experimental_client(self):
-        return create_oidc_client(**self.dict(by_alias=False, include=set(signature(create_oidc_client).parameters)))
+        return create_oidc_client_from_dct(self.dict(by_alias=False))
 
 
-class DeployCredentials(GithubActionModel, CredentialsMixin):
-    cdf_project: Optional[NonEmptyString]
+class DeployCredentials(GithubActionModel, CredentialsModel):
+    cdf_project: NonEmptyString
     cdf_cluster: NonEmptyString
     client_id: NonEmptyString = Field(alias="deployment_client_id")
     tenant_id: NonEmptyString = Field(alias="deployment_tenant_id")
     client_secret: NonEmptyString = Field(alias="deployment_client_secret")
 
+    @root_validator(skip_on_failure=True)
+    def verify_credentials_and_capabilities(cls, values):
+        project = values["cdf_project"]
+        token_inspect = verify_credentials_vs_project(values, project, cred_name="deploy")
+        verify_capabilites(token_inspect, project, cred_name="deploy")
+        return values
 
-class SchedulesConfig(GithubActionModel, CredentialsMixin):
+
+class SchedulesConfig(GithubActionModel, CredentialsModel):
     schedule_file: Optional[constr(min_length=1, strip_whitespace=True, regex=r"^[\w\- /]+\.ya?ml$")]  # noqa: F722
     client_id: Optional[NonEmptyString] = Field(alias="schedules_client_id")
     client_secret: Optional[NonEmptyString] = Field(alias="schedules_client_secret")
     tenant_id: Optional[NonEmptyString] = Field(alias="schedules_tenant_id")
-    cdf_cluster: Optional[NonEmptyString]
+    cdf_project: NonEmptyString
+    cdf_cluster: NonEmptyString
     schedules: Optional[List[FunctionSchedule]]
 
     @root_validator(skip_on_failure=True)
-    def verify_schedule_credentials_are_given(cls, values):
+    def verify_schedule_credentials(cls, values):
         if values["schedule_file"] is None:
             return values
         # If schedules are given, credentials must be set:
@@ -75,6 +88,7 @@ class SchedulesConfig(GithubActionModel, CredentialsMixin):
                 "Schedules created for OIDC functions require additional client credentials (to be used  at runtime). "
                 "Missing one or more of ['schedules_client_secret', 'schedules_client_id', 'schedules_tenant_id']"
             )
+        verify_credentials_vs_project(values, cred_name="schedule")
         return values
 
 
@@ -116,10 +130,10 @@ class FunctionConfig(GithubActionModel):
 
     @root_validator(skip_on_failure=True)
     def check_function_folders(cls, values):
-        verify_path_is_directory(values["function_folder"])
+        verify_path_is_directory(values["function_folder"], parameter="function_folder")
 
         if (common_folder := values["common_folder"]) is not None:
-            verify_path_is_directory(common_folder)
+            verify_path_is_directory(common_folder, parameter="common_folder")
         else:
             # Try default directory 'common/':
             with suppress(ValueError):
@@ -128,26 +142,9 @@ class FunctionConfig(GithubActionModel):
 
 
 class RunConfig(BaseModel):
+    deploy_creds: DeployCredentials
     schedule: SchedulesConfig
     function: FunctionConfig
-
-    @staticmethod
-    def verify_single_credential(cred_config, name):
-        try:
-            client = cred_config.experimental_client
-            res = client.iam.token.inspect()
-            # TODO: Is this really how to project??
-            logger.info(f"{name.title()} credentials verified towards {res.projects[0].url_name}!")
-        except CogniteAPIError:
-            raise ValueError(
-                f"{name.title()} credentials wrong or missing capabilities! (Test endpoint: /token/inspect)"
-            )
-
-    @root_validator(skip_on_failure=True)
-    def verify_credentials(cls, values):
-        cls.verify_single_credential(values["function"], name="deploy")
-        if values["schedule"].schedule_file is None:
-            cls.verify_single_credential(values["schedule"], name="schedule")
 
     @root_validator(skip_on_failure=True)
     def verify_and_parse_schedules(cls, values) -> List[FunctionSchedule]:

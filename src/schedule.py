@@ -40,4 +40,4 @@ def deploy_schedules(client: CogniteClient, fn: Function, schedule_config: Sched
             client_credentials=schedule_config.credentials,
             **dict(s),
         )
-        logger.info(f"- Schedule '{s.name}' with cron: '{s.cron}' attached successfully!")
+        logger.info(f"- Schedule '{s.name}' with cron: '{s.cron_expression}' attached successfully!")

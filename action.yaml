@@ -30,7 +30,7 @@ inputs:
         required: false
     cdf_project:
         description: The name of your CDF project.
-        required: false
+        required: true
     cdf_cluster:
         description: The cluster your customer's CDF project lives in.
         default: westeurope-1
@@ -55,8 +55,8 @@ inputs:
             Relative path and name from (function_folder) of the file with schedules to be attached.
             Not passing this parameter -> no schedules will be attached. If the passed file does not
             exist, a warning will be issued, and no schedules will be attached. On all deployments,
-            all existing schedules are deleted (and recreated if there are any)! Note: Requires both
-            'schedules_client_secret' and 'schedules_client_id' to be passed!
+            all existing schedules are deleted (and recreated if there are any)! Note: Requires
+            'schedules_client_secret', 'schedules_tenant_id' and 'schedules_client_id' to be passed!
         required: false
     data_set_external_id:
         description: Data set external ID to use for the function-associated file (zipped code folder).
@@ -70,7 +70,7 @@ inputs:
     remove_only:
         description: |
             Short-cut that ONLY removes the function (and all schedules linked) before quitting. Only
-            requires deployment credentials and 'function_external_id' to be passed.
+            requires deployment credentials, 'cdf_project' and 'function_external_id' to be passed.
         default: false
         required: false
     cpu:

@@ -4,3 +4,7 @@ class FunctionDeployTimeout(RuntimeError):
 
 class FunctionDeployError(RuntimeError):
     pass
+
+
+class FunctionValidationError(Exception):
+    pass

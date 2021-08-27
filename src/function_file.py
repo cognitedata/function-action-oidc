@@ -42,12 +42,12 @@ def upload_zipped_code_to_files(
             raise
         if ds.write_protected:
             err_msg = (
-                "Unable to upload file to WRITE-PROTECTED dataset: Deployment key MUST have capability "
+                "Unable to upload file to WRITE-PROTECTED dataset: Deployment credentials MUST have capability "
                 "'dataset:OWNER' (and have 'files:WRITE' scoped to the same dataset OR all files)."
             )
         else:
             err_msg = (
-                "Unable to upload file to dataset: Deployment key must have capability "
+                "Unable to upload file to dataset: Deployment credentials must have capability "
                 "'files:WRITE' scoped to the same dataset OR all files."
             )
         logger.error(err_msg)
@@ -59,7 +59,7 @@ def zip_and_upload_folder(client: CogniteClient, fn_config: FunctionConfig, name
     buf = io.BytesIO()  # TempDir, who needs that?! :rocket:
     with ZipFile(buf, mode="a") as zf:
         with temporary_chdir(fn_config.function_folder):
-            _write_files_to_zip_buffer(zf, directory=".")
+            _write_files_to_zip_buffer(zf, directory=Path())
 
         if (common_folder := fn_config.common_folder) is not None:
             with temporary_chdir(common_folder.parent):  # Note .parent
