@@ -4,14 +4,16 @@ from os import getenv
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel, Field, constr, root_validator, validator
+from pydantic import BaseModel, Field, root_validator, validator
 from yaml import safe_load  # type: ignore
 
 from access import verify_capabilites, verify_credentials_vs_project
 from schedule import FunctionSchedule
 from utils import (
+    FnFileString,
     NonEmptyString,
     NonEmptyStringMax128,
+    YamlFileString,
     create_oidc_client_from_dct,
     decode_and_parse,
     verify_path_is_directory,
@@ -69,7 +71,7 @@ class DeployCredentials(GithubActionModel, CredentialsModel):
 
 
 class SchedulesConfig(GithubActionModel, CredentialsModel):
-    schedule_file: Optional[constr(min_length=1, strip_whitespace=True, regex=r"^[\w\- /]+\.ya?ml$")]  # noqa: F722
+    schedule_file: Optional[YamlFileString]
     client_id: Optional[NonEmptyString] = Field(alias="schedules_client_id")
     client_secret: Optional[NonEmptyString] = Field(alias="schedules_client_secret")
     tenant_id: Optional[NonEmptyString] = Field(alias="schedules_tenant_id")
@@ -96,7 +98,7 @@ class FunctionConfig(GithubActionModel):
     function_external_id: NonEmptyString
     function_folder: Path
     function_secrets: Optional[Dict[str, str]]
-    function_file: constr(min_length=1, strip_whitespace=True, regex=r"^[\w\- ]+\.(py|js)$")  # noqa: F722
+    function_file: FnFileString
     common_folder: Optional[Path]
     data_set_external_id: Optional[str]
     cpu: Optional[float]

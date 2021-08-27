@@ -3,7 +3,7 @@ import time
 
 from cognite.experimental import CogniteClient
 from cognite.experimental.data_classes import Function
-from retry import retry
+from retry import retry  # type: ignore
 
 from configs import FunctionConfig
 from exceptions import FunctionDeployError
