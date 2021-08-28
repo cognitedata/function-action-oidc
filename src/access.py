@@ -50,23 +50,21 @@ def filter_capabilities(capabilities: Iterable[Capability], acl: str) -> Iterato
 
 def missing_function_capabilities(capabilities: Iterable[Capability]):
     actions = set(a for c in filter_capabilities(capabilities, acl="functionsAcl") for a in c.actions)
-    if (required := set(["READ", "WRITE"])) == actions:
-        return []
-    return [f"Functions:{req}" for req in required]
+    if missing := set(["READ", "WRITE"]) - actions:
+        return [f"Functions:{m}" for m in missing]
+    return []
 
 
 def missing_files_capabilities(capabilities: Iterable[Capability]):
     # files_capes = list(filter_capabilities(capabilities, acl="filesAcl"))
     # TODO: Implement!
-    logger.info("FilesAcl capabilities not yet verified (reason: not implemented)!")
+    logger.info("FilesAcl capabilities not verified! Reason: Not implemented yet ;)")
     return []
 
 
 def verify_capabilites(token_inspect: TokenInspection, project: str, cred_name: str) -> None:
     capabilities = list(filter(lambda c: project in c.projects, map(Capability.from_dict, token_inspect.capabilities)))
-    missing_capabilites = missing_function_capabilities(capabilities) + missing_files_capabilities(capabilities)
-    if missing_capabilites:
-        raise ValueError(
-            f"{cred_name.title()} credentials missing one or more required capabilities: {missing_capabilites}"
-        )
+    missing = missing_function_capabilities(capabilities) + missing_files_capabilities(capabilities)
+    if missing:
+        raise ValueError(f"{cred_name.title()} credentials missing one or more required capabilities: {missing}")
     logger.info(f"{cred_name.title()} credentials capabilities verified!")
