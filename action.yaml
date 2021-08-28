@@ -65,7 +65,6 @@ inputs:
         description: |
             Directory which contains code used by multiple functions. If not specified, will default
             to 'common' (if it exists).
-        default: common
         required: false
     remove_only:
         description: |

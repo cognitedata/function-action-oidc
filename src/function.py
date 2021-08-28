@@ -50,9 +50,9 @@ def create_function(client: CogniteClient, file_id: int, fn_config: FunctionConf
     fn_xid = fn_config.function_external_id
     logger.info(f"Trying to create function '{fn_xid}'...")
     if secrets := fn_config.function_secrets:
-        logger.info(f"- With {len(secrets)} extra secret(s) named: {list(secrets)}")
+        logger.info(f"...with {len(secrets)} extra secret(s) named: {list(secrets)}")
     else:
-        logger.info("- With no extra secrets")
+        logger.info("...with no extra secrets")
 
     fn = client.functions.create(file_id=file_id, **fn_config.create_fn_params())
     logging.info(f"Function '{fn_xid}' created successfully! (ID: {fn.id}).")

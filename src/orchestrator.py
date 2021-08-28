@@ -14,7 +14,7 @@ from utils import create_zipfile_name
 logger = logging.getLogger(__name__)
 
 
-def remove_function_with_file(fn_xid: str, client: CogniteClient):
+def remove_function_with_file(client: CogniteClient, fn_xid: str):
     delete_function(client, fn_xid)
     delete_function_file(client, create_zipfile_name(fn_xid))
     time.sleep(3)  # Tiny breather

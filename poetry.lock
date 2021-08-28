@@ -39,7 +39,7 @@ unicode_backport = ["unicodedata2"]
 
 [[package]]
 name = "cognite-sdk"
-version = "2.29.0"
+version = "2.31.0"
 description = "Client library for Cognite Data Fusion (CDF)"
 category = "main"
 optional = false
@@ -409,7 +409,7 @@ testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "6258126964ca24ff71fa95207a84c03c1c153f7db6b445a34df771db46036209"
+content-hash = "0472b5ee5cd9c3e5930c54334397bbc6f01a9281b5593e9d657dd41b5a96892d"
 
 [metadata.files]
 "backports.entry-points-selectable" = [
@@ -429,8 +429,8 @@ charset-normalizer = [
     {file = "charset_normalizer-2.0.4-py3-none-any.whl", hash = "sha256:0c8911edd15d19223366a194a513099a302055a962bca2cec0f54b8b63175d8b"},
 ]
 cognite-sdk = [
-    {file = "cognite-sdk-2.29.0.tar.gz", hash = "sha256:01b562c1ab4951044ca205a1d61324ee11915b023bac5aab48628a5b75c1528f"},
-    {file = "cognite_sdk-2.29.0-py3-none-any.whl", hash = "sha256:93f419bd5ec5ed07d98eeae4fb7ec5aea164508082a93370fc2d98572159a9d9"},
+    {file = "cognite-sdk-2.31.0.tar.gz", hash = "sha256:500262a76c430b93fa92c4e20283eadfbdfd18e02d1d324fc1e2e9f03aea04a7"},
+    {file = "cognite_sdk-2.31.0-py3-none-any.whl", hash = "sha256:f413b645ac53a74762b44e3fc2215a782794eb2662ac5147cfdde271b033909d"},
 ]
 cognite-sdk-experimental = [
     {file = "cognite-sdk-experimental-0.59.2.tar.gz", hash = "sha256:85350efa2ed75f4e1431e4fee577d71ddd66d0a339c0d95f09e4232b86ca4ef4"},

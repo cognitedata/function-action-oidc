@@ -4,11 +4,11 @@ from os import getenv
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from crontab import CronSlices
 from pydantic import BaseModel, Field, root_validator, validator
 from yaml import safe_load  # type: ignore
 
 from access import verify_capabilites, verify_credentials_vs_project
-from schedule import FunctionSchedule
 from utils import (
     FnFileString,
     NonEmptyString,
@@ -20,6 +20,22 @@ from utils import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class FunctionSchedule(BaseModel):
+    class Config:
+        allow_population_by_field_name = True
+
+    name: NonEmptyString
+    description: Optional[NonEmptyString]
+    cron_expression: NonEmptyString = Field(alias="cron")
+    data: Optional[Dict]
+
+    @validator("cron_expression")
+    def validate_cron(cls, cron):
+        if not CronSlices.is_valid(cron):
+            raise ValueError(f"Invalid cron expression: '{cron}'")
+        return cron
 
 
 class GithubActionModel(BaseModel):
@@ -132,14 +148,14 @@ class FunctionConfig(GithubActionModel):
 
     @root_validator(skip_on_failure=True)
     def check_function_folders(cls, values):
-        verify_path_is_directory(values["function_folder"], parameter="function_folder")
+        verify_path_is_directory(values["function_folder"], "function_folder")
 
         if (common_folder := values["common_folder"]) is not None:
-            verify_path_is_directory(common_folder, parameter="common_folder")
+            verify_path_is_directory(common_folder, "common_folder")
         else:
             # Try default directory 'common/':
             with suppress(ValueError):
-                values["common_folder"] = verify_path_is_directory(Path("common"))
+                values["common_folder"] = verify_path_is_directory(Path("common"), "common")
         return values
 
 

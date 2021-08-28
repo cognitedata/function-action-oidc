@@ -2,8 +2,8 @@ import logging
 from dataclasses import dataclass
 from typing import Dict, Iterable, Iterator, List
 
-from cognite.client.data_classes import TokenInspection
-from cognite.client.exception import CogniteAPIError
+from cognite.client.data_classes.iam import TokenInspection
+from cognite.client.exceptions import CogniteAPIError
 
 from utils import create_oidc_client_from_dct
 
@@ -20,7 +20,7 @@ def verify_credentials_vs_project(creds: Dict[str, object], project: str, cred_n
             "Requires both 'Projects:LIST' and 'Groups:LIST'!"
         )
     # Check that given project is in the list of authenticated projects:
-    if project not in (valid_projects := [p.url_name for p in token_inspect.valid_projects]):
+    if project not in (valid_projects := [p.url_name for p in token_inspect.projects]):
         err_msg = f"{cred_name.title()} credentials NOT verified towards given {project=}, but {valid_projects}!"
         logger.error(err_msg)
         raise ValueError(err_msg)
