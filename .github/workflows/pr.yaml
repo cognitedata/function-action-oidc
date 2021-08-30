@@ -20,20 +20,14 @@ jobs:
 
     - name: Install dependencies
       run: |
-        python3 -m pip install --upgrade pip poetry
+        python -m pip install --upgrade pip poetry
         poetry config virtualenvs.create false
         poetry install
 
-    - name: Check codestyle
-      run: |
-        poetry run black --check .
-        poetry run isort --check-only .
+    - uses: pre-commit/action@v2.0.3
+      name: Validate code changes using Pre-Commit
 
-    - name: Check application security
-      run: |
-        poetry run bandit -r . -s B101,B322
-
-    - name: Run tests
-      run: |
-        PYTHONPATH=src poetry run pytest -v --cov-report xml:coverage.xml --cov=src
-        coverage xml
+    # - name: Run tests
+    #   run: |
+    #     PYTHONPATH=src poetry run pytest -v --cov-report xml:coverage.xml --cov=src
+    #     coverage xml

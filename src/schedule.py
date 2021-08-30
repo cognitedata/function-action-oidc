@@ -1,35 +1,23 @@
 import logging
-from typing import List
 
 from cognite.experimental import CogniteClient
 from cognite.experimental.data_classes import Function
 
-from config import ScheduleConfig
+from configs import SchedulesConfig
 
 logger = logging.getLogger(__name__)
 
 
-def delete_function_schedules(client: CogniteClient, function_external_id: str):
-    all_schedules = client.functions.schedules.list(function_external_id=function_external_id, limit=None)
-    if all_schedules:
-        for s in all_schedules:  # TODO: Experimental SDK does not support "delete multiple"
-            client.functions.schedules.delete(s.id)
-        logger.info(f"Deleted all ({len(all_schedules)}) existing schedule(s)!")
-    else:
-        logger.info("No existing schedule(s) to delete!")
-
-
-def deploy_schedules(client: CogniteClient, function: Function, schedules: List[ScheduleConfig]):
-    if not schedules:
-        logger.info("No schedules to attach!")
+def deploy_schedules(client: CogniteClient, fn: Function, schedule_config: SchedulesConfig):
+    if not (schedules := schedule_config.schedules):
+        logger.info("No schedules to attach to function!")
         return
 
-    logger.info(f"Attaching {len(schedules)} schedule(s) to {function.external_id}")
-    for schedule in schedules:
+    logger.info(f"Attaching {len(schedules)} schedule(s) to {fn.external_id} (by ID: {fn.id})")
+    for s in schedules:
         client.functions.schedules.create(
-            function_external_id=function.external_id,
-            cron_expression=schedule.cron,
-            name=schedule.name,
-            data=schedule.data,
+            function_id=fn.id,
+            client_credentials=schedule_config.credentials,
+            **dict(s),
         )
-        logger.info(f"- Schedule '{schedule.name}' with cron: '{schedule.cron}' attached successfully!")
+        logger.info(f"- Schedule '{s.name}' with cron: '{s.cron_expression}' attached successfully!")
