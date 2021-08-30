@@ -120,7 +120,7 @@ class FunctionConfig(GithubActionModel):
     cpu: Optional[float]
     memory: Optional[float]
     owner: Optional[NonEmptyStringMax128]
-    function_description: Optional[NonEmptyStringMax128]
+    description: Optional[NonEmptyStringMax128]
 
     def create_fn_params(self):
         return {
@@ -131,7 +131,7 @@ class FunctionConfig(GithubActionModel):
             "owner": self.owner,
             "cpu": self.cpu,
             "memory": self.memory,
-            "description": self.function_description,
+            "description": self.description,
         }
 
     @validator("function_secrets")
