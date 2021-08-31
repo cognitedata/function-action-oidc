@@ -5,31 +5,29 @@ This action deploys a Python function to Cognite Functions, optionally with sche
 ### Function metadata in Github Workflow
 #### Required
 1. `function_external_id`: What we will use as `external_id` for the function. If it is not unique within your project, *the existing function will be overwritten*!
-1. `function_folder`: Parent folder for the function's code. Everything within this folder will be uploaded, (so if you need your special CSV-file; don't worry, it will automatically be included!)
-1. `cdf_project`: The name of your CDF project
-1. `cdf_cluster`: The cluster your customer's CDF project lives in, like `westeurope-1` or `greenfield`
-1. `deployment_client_secret`: Client secret, only to be used for DEPLOYMENT of the function
-1. `deployment_client_id`:  Client ID, only to be used for DEPLOYMENT of the function
-1. `deployment_tenant_id`:  Tenant ID, only to be used for DEPLOYMENT of the function
+1. `function_folder`: Parent folder for the function's code. Everything within this folder will be uploaded (so if you need your special CSV-file; don't worry, it will automatically be included!)
+1. `cdf_project`: The name of your CDF project.
+1. `cdf_cluster`: The cluster your customer's CDF project lives in, like `westeurope-1` or `greenfield`.
+1. `deployment_client_secret`: Client secret, only to be used for DEPLOYMENT of the function.
+1. `deployment_client_id`:  Client ID, only to be used for DEPLOYMENT of the function.
+1. `deployment_tenant_id`:  Tenant ID, only to be used for DEPLOYMENT of the function.
 
 #### Required *if attaching schedules*
-1. `schedule_file`: File location inside `function_folder` containing a list of schedules to be attached to your function
-
-If this file exists, *then* `schedules_client_secret`, `schedules_client_id` and `schedules_tenant_id` will be required. Note: Ignored with warning if pointing to a non-existent file. More details in section below
-1. `schedules_client_secret`: Client secret to be used at RUNTIME for the function, but ONLY for its scheduled runs! **Note: Calling the function normally, still uses the caller's credentials!**
+1. `schedule_file`: File location inside `function_folder` containing a list of schedules to be attached to your function. If this file exists, *then* `schedules_client_secret`, `schedules_client_id` and `schedules_tenant_id` will be required. Note: Schedule file will be ignored with a warning if it is pointing to a non-existing file. More details in section below.
+1. `schedules_client_secret`: Client secret to be used at RUNTIME for the function, but ONLY for its scheduled runs! **Note: Calling the function normally, still uses the caller's credentials!**.
 1. `schedules_client_id`:  Client ID to be used at RUNTIME for the function, but ONLY for its scheduled runs!
 1. `schedules_tenant_id`:  Tenant ID to be used at RUNTIME for the function, but ONLY for its scheduled runs!
 
 #### Optional
-1. `remove_only`: Short-cut: Deletes function along with all attached schedules. Ignores most other parameters!
-1. `common_folder`:  The path to the folder containing code that is shared between all functions. Defaults to `common/`. More information in section below
-1. `function_file`: The name of the file with your main function (defaults to `handler.py`)
-1. `function_secrets`: The name of a Github secret that holds the base64-encoded JSON dictionary with secrets (see "secrets section")
-1. `data_set_external_id`: Data set external ID (for FilesAPI) to use for the function-associated file (zipped code folder). Requires two *additional* DEPLOYMENT capabilities: 'dataset:READ' and 'files:WRITE' scoped to either the dataset you are going to use, or 'all'. Note: If your data set is WRITE PROTECTED, you also need to add the capability 'dataset:OWNER' for it. Read more about data sets in the official documentation: [Data sets](https://docs.cognite.com/cdf/data_governance/concepts/datasets/)
-1. `description`: Additional field to describe the function
-1. `owner`: Additional field to describe the function owner
-1. `cpu`: Set fractional number of CPU cores per function. **Ignored for functions running on Azure!** See defaults and allowed values in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
-1. `memory`: Set memory per function measured in GB. **Ignored for functions running on Azure!** See defaults and allowed values in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
+1. `remove_only`: **Short-cut**: Deletes function along with all attached schedules. Ignores most other parameters!
+1. `common_folder`:  The path to the folder containing code that is shared between all functions. Defaults to `common/`. More information in section below.
+1. `function_file`: The name of the file with your main function. Will default to `handler.py` if not given.
+1. `function_secrets`: The *name* of a Github secret that holds the base64-encoded JSON dictionary with secrets (see "secrets section").
+1. `data_set_external_id`: Data set external ID (for FilesAPI) to use for the function-associated file (zipped code folder). Requires two *additional* DEPLOYMENT capabilities: 'dataset:READ' and 'files:WRITE' scoped to *either* the dataset you are going to use, or 'all'. Note: If your data set is WRITE PROTECTED, you also need to add the capability 'dataset:OWNER' for it. Read more about data sets in the official documentation: [Data sets](https://docs.cognite.com/cdf/data_governance/concepts/datasets/)
+1. `description`: Additional field to describe the function.
+1. `owner`: Additional field to describe the function owner.
+1. `cpu`: Set fractional number of CPU cores per function. **Ignored for functions running on Azure!**. See defaults and allowed values in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
+1. `memory`: Set memory per function measured in GB. **Ignored for functions running on Azure!**. See defaults and allowed values in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
 
 
 ### Schedule file format [`.yaml`]
