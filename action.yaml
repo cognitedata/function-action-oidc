@@ -32,9 +32,8 @@ inputs:
         description: The name of your CDF project.
         required: true
     cdf_cluster:
-        description: The cluster your customer's CDF project lives in.
-        default: westeurope-1
-        required: false
+        description: The cluster your customer's CDF project lives in, like 'westeurope-1' or 'greenfield'.
+        required: true
     function_external_id:
         description: |
             External ID and name of function. Must be unique within the CDF project as this action
@@ -81,7 +80,7 @@ inputs:
     owner:
         description: Set owner of a function, e.g. "My Client".
         required: false
-    function_description:
+    description:
         description: Set description field of a function, e.g. "This does X for Y if Z".
         required: false
 outputs:
