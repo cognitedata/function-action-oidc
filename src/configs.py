@@ -106,7 +106,7 @@ class SchedulesConfig(GithubActionModel, CredentialsModel):
                 "Schedules created for OIDC functions require additional client credentials (to be used  at runtime). "
                 "Missing one or more of ['schedules_client_secret', 'schedules_client_id', 'schedules_tenant_id']"
             )
-        verify_credentials_vs_project(values, cred_name="schedule")
+        verify_credentials_vs_project(values, values["cdf_project"], cred_name="schedule")
         return values
 
 
