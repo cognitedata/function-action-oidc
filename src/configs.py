@@ -137,7 +137,7 @@ class FunctionConfig(GithubActionModel):
             "description": self.description,
         }
 
-    @validator("function_secrets")
+    @validator("function_secrets", pre=True)
     def validate_and_parse_secret(cls, value):
         if value is None:
             return value
