@@ -18,10 +18,11 @@ def verify_credentials_vs_project(client: CogniteClient, project: str, cred_name
     try:
         token_inspect = client.iam.token.inspect()
     except CogniteAPIError:
-        raise ValueError(
-            f"{cred_name.title()} credentials wrong or missing one or more capabilities! "
-            "Requires both 'Projects:LIST' and 'Groups:LIST'!"
+        logger.error(
+            f"Unable to call 'token/inspect'. Probable cause: {cred_name.title()} credentials wrong or missing "
+            "one or more capabilities! Requires both 'Projects:LIST' and 'Groups:LIST'!"
         )
+        raise
     # Check that given project is in the list of authenticated projects:
     if project not in (valid_projects := [p.url_name for p in token_inspect.projects]):
         err_msg = f"{cred_name.title()} credentials NOT verified towards given {project=}, but {valid_projects}!"

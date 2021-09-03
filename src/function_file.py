@@ -7,6 +7,7 @@ from zipfile import ZipFile
 from cognite.client.data_classes import DataSet, FileMetadata
 from cognite.client.exceptions import CogniteAPIError
 from cognite.experimental import CogniteClient
+from retry import retry
 
 from configs import FunctionConfig
 from exceptions import FunctionDeployError
@@ -22,19 +23,28 @@ def _write_files_to_zip_buffer(zf: ZipFile, directory: Path):
             zf.write(Path(dirpath) / f)
 
 
+@retry(exceptions=FunctionDeployError, tries=12, delay=2, jitter=2, max_delay=15)
+def await_file_upload_status(client: CogniteClient, file_id: int):
+    if not client.files.retrieve(file_id).uploaded:
+        logger.info(f"- File (ID: {file_id}) not yet uploaded...")
+        raise FunctionDeployError("File upload failed to reach 'uploaded=True' status")
+
+
 def upload_zipped_code_to_files(
     client: CogniteClient,
     file_bytes: bytes,
     xid: str,
     ds: DataSet,
 ) -> FileMetadata:
-    return client.files.upload_bytes(
+    file_meta = client.files.upload_bytes(
         file_bytes,
         name=xid,
         external_id=xid,
         data_set_id=ds.id,
         overwrite=True,
     )
+    await_file_upload_status(client, file_meta.id)
+    return file_meta
 
 
 def zip_and_upload_folder(client: CogniteClient, fn_config: FunctionConfig, xid: str) -> int:

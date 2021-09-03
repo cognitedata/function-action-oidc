@@ -36,7 +36,7 @@ def await_function_deployment(client: CogniteClient, fn: Function, wait_time_sec
 
         elif now > next_info_log:
             next_info_log += 90
-            logger.info(f"Function deployment in progress... Elapsed time: {elapsed_time}")
+            logger.info(f"- Deployment in progress, time elapsed: {elapsed_time}")
 
         time.sleep(5)
         fn.update()

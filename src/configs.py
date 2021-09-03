@@ -84,7 +84,7 @@ class DeployCredentials(GithubActionModel, CredentialsModel):
         project = values["cdf_project"]
         token_inspect = verify_credentials_vs_project(client, project, cred_name="deploy")
         data_set_id = values["data_set_id"]
-        verify_capabilites(token_inspect, client, project, data_set_id=data_set_id)
+        verify_capabilites(token_inspect, client, project, ds_id=data_set_id)
         return values
 
 
