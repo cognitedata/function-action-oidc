@@ -1,5 +1,4 @@
 import logging
-from contextlib import suppress
 from os import getenv
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -77,12 +76,15 @@ class DeployCredentials(GithubActionModel, CredentialsModel):
     client_id: NonEmptyString = Field(alias="deployment_client_id")
     tenant_id: NonEmptyString = Field(alias="deployment_tenant_id")
     client_secret: NonEmptyString = Field(alias="deployment_client_secret")
+    data_set_id: Optional[int]  # For acl/capability checks only
 
     @root_validator(skip_on_failure=True)
     def verify_credentials_and_capabilities(cls, values):
+        client = create_oidc_client_from_dct(values)
         project = values["cdf_project"]
-        token_inspect = verify_credentials_vs_project(values, project, cred_name="deploy")
-        verify_capabilites(token_inspect, project, cred_name="deploy")
+        token_inspect = verify_credentials_vs_project(client, project, cred_name="deploy")
+        data_set_id = values["data_set_id"]
+        verify_capabilites(token_inspect, client, project, data_set_id=data_set_id)
         return values
 
 
@@ -106,7 +108,8 @@ class SchedulesConfig(GithubActionModel, CredentialsModel):
                 "Schedules created for OIDC functions require additional client credentials (to be used  at runtime). "
                 "Missing one or more of ['schedules_client_secret', 'schedules_client_id', 'schedules_tenant_id']"
             )
-        verify_credentials_vs_project(values, values["cdf_project"], cred_name="schedule")
+        client = create_oidc_client_from_dct(values)
+        verify_credentials_vs_project(client, project=values["cdf_project"], cred_name="schedule")
         return values
 
 
@@ -116,7 +119,7 @@ class FunctionConfig(GithubActionModel):
     function_secrets: Optional[Dict[str, str]]
     function_file: FnFileString
     common_folder: Optional[Path]
-    data_set_external_id: Optional[str]
+    data_set_id: Optional[int]
     cpu: Optional[float]
     memory: Optional[float]
     owner: Optional[NonEmptyStringMax128]
@@ -150,12 +153,10 @@ class FunctionConfig(GithubActionModel):
     def check_function_folders(cls, values):
         verify_path_is_directory(values["function_folder"], "function_folder")
 
-        if (common_folder := values["common_folder"]) is not None:
-            verify_path_is_directory(common_folder, "common_folder")
+        if (common_folder := values["common_folder"]) is None:
+            logger.info("No 'common code' directory added to the function!")
         else:
-            # Try default directory 'common/':
-            with suppress(ValueError):
-                values["common_folder"] = verify_path_is_directory(Path("common"), "common")
+            verify_path_is_directory(common_folder, "common_folder")
         return values
 
 

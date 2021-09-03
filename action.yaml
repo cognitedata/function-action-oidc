@@ -57,8 +57,8 @@ inputs:
             all existing schedules are deleted (and recreated if there are any)! Note: Requires
             'schedules_client_secret', 'schedules_tenant_id' and 'schedules_client_id' to be passed!
         required: false
-    data_set_external_id:
-        description: Data set external ID to use for the function-associated file (zipped code folder).
+    data_set_id:
+        description: Data set ID to use for the file uploaded to CDF (the function-associated file, i.e. the zipped code folder)
         required: false
     common_folder:
         description: |

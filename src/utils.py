@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 
 from cognite.client.data_classes import DataSet
-from cognite.client.exceptions import CogniteAPIError
 from cognite.experimental import CogniteClient
 from pydantic import constr
 
@@ -49,17 +48,11 @@ def verify_path_is_directory(path: Path, parameter: str) -> Path:
     return path
 
 
-def retrieve_dataset(client: CogniteClient, xid: str) -> DataSet:
-    try:
-        # Patiently awaiting FilesAPI support of dataset xids...
-        if ds := client.data_sets.retrieve(external_id=xid):
-            return ds
-        raise ValueError(f"No dataset exists with external ID: '{xid}'")
-
-    except CogniteAPIError as exc:
-        err_msg = "Unable to retrieve dataset: Deployment credentials is missing capability 'dataset:READ'."
-        logger.error(err_msg)
-        raise CogniteAPIError(err_msg, exc.code, exc.x_request_id) from None
+@lru_cache(None)
+def retrieve_dataset(client: CogniteClient, id: int) -> DataSet:
+    if ds := client.data_sets.retrieve(id):
+        return ds
+    raise ValueError(f"No dataset exists with ID: '{id}'")
 
 
 @lru_cache(None)

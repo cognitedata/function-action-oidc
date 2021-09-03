@@ -20,10 +20,10 @@ This action deploys a Python function to Cognite Functions, optionally with sche
 
 #### Optional
 1. `remove_only`: **Short-cut**: Deletes function along with all attached schedules. Ignores most other parameters!
-1. `common_folder`:  The path to the folder containing code that is shared between all functions. Defaults to `common/`. More information in section below.
+1. `common_folder`:  The path to the folder containing code that is shared between functions. See section below for more details.
 1. `function_file`: The name of the file with your main function. Will default to `handler.py` if not given.
 1. `function_secrets`: The *name* of a Github secret that holds the base64-encoded JSON dictionary with secrets (see "secrets section").
-1. `data_set_external_id`: Data set external ID (for FilesAPI) to use for the function-associated file (zipped code folder). Requires two *additional* DEPLOYMENT capabilities: 'dataset:READ' and 'files:WRITE' scoped to *either* the dataset you are going to use, or 'all'. Note: If your data set is WRITE PROTECTED, you also need to add the capability 'dataset:OWNER' for it. Read more about data sets in the official documentation: [Data sets](https://docs.cognite.com/cdf/data_governance/concepts/datasets/)
+1. `data_set_id`: Data set ID to use for the file uploaded to CDF (the function-associated file: *zipped code folder*). Requires two *additional* DEPLOYMENT capabilities: 'dataset:READ' and 'files:WRITE' scoped to *either* the dataset you are going to use, or 'all'. Note: If your data set is WRITE PROTECTED, you also need to add the capability 'dataset:OWNER' for it. Read more about data sets in the official documentation: [Data sets](https://docs.cognite.com/cdf/data_governance/concepts/datasets/)
 1. `description`: Additional field to describe the function.
 1. `owner`: Additional field to describe the function owner.
 1. `cpu`: Set fractional number of CPU cores per function. **Ignored for functions running on Azure!**. See defaults and allowed values in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
