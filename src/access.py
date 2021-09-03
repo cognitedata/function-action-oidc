@@ -57,6 +57,10 @@ class Capability:
         return id in self.scope.get("idScope", {}).get("ids", [])
 
 
+def parse_capabilities_from_token_inspect_for_project(token_inspect: TokenInspection, project: str):
+    return list(filter(lambda c: project in c.projects, map(Capability.from_dict, token_inspect.capabilities)))
+
+
 def filter_capabilities(capabilities: Iterable[Capability], acl: str) -> Iterator[Capability]:
     return filter(lambda c: c.acl == acl, capabilities)
 
@@ -64,7 +68,14 @@ def filter_capabilities(capabilities: Iterable[Capability], acl: str) -> Iterato
 def missing_function_capabilities(capabilities: Iterable[Capability]) -> List[str]:
     actions = set(a for c in filter_capabilities(capabilities, acl="functionsAcl") for a in c.actions)
     if missing := set(["READ", "WRITE"]) - actions:
-        return [f"FunctionsAcl:{m} (scope: 'all')" for m in missing]
+        return [f"functionsAcl:{m} (scope: 'all')" for m in missing]
+    return []
+
+
+def missing_session_capabilities(capabilities: Iterable[Capability]) -> List[str]:
+    actions = set(a for c in filter_capabilities(capabilities, acl="sessionsAcl") for a in c.actions)
+    if "CREATE" not in actions:
+        return ["sessionsAcl:CREATE (scope: 'all')"]
     return []
 
 
@@ -78,37 +89,48 @@ def missing_files_capabilities(
     if ds_id is None:
         # Not using a data set, so we require Files:READ/WRITE in scope=ALL:
         if missing_files_acl:
-            return [f"FilesAcl:{m} (scope: 'all') (Tip: consider using a data set!)" for m in missing_files_acl]
+            return [f"filesAcl:{m} (scope: 'all') (Tip: consider using a data set!)" for m in missing_files_acl]
         return []
 
     # If using a data set, we also accept *it* as scope for files:
     missing_acls = []
     files_actions_dsid_scope = set(a for c in files_capes for a in c.actions if c.is_dataset_scope(ds_id))
     if missing_files_acl := missing_files_acl - files_actions_dsid_scope:
-        missing_acls += [f"FilesAcl:{m} (scope: 'all' OR 'dataset: {ds_id}')" for m in missing_files_acl]
+        missing_acls += [f"filesAcl:{m} (scope: 'all' OR 'dataset: {ds_id}')" for m in missing_files_acl]
 
     data_set_capes = filter_capabilities(capabilities, acl="datasetsAcl")
     data_set_actions = set(a for c in data_set_capes for a in c.actions if c.is_all_scope() or c.is_ids_scope(ds_id))
     if "READ" not in data_set_actions:
         # No read access to the given data set, so we can't check if it is write protected:
-        missing_acls.append(f"DatasetsAcl:READ (scope: 'all' OR 'id: {ds_id}')")
+        missing_acls.append(f"datasetsAcl:READ (scope: 'all' OR 'id: {ds_id}')")
         if "OWNER" not in data_set_actions:
             missing_acls.append("(If dataset is write protected, you'll also need OWNER)")
         return missing_acls
 
     if retrieve_dataset(client, ds_id).write_protected:
         if "OWNER" not in data_set_actions:
-            missing_acls.append(f"DatasetsAcl:OWNER (scope: 'all' OR 'id: {ds_id}'). NB: 'all scope' not recommended!")
+            missing_acls.append(f"datasetsAcl:OWNER (scope: 'all' OR 'id: {ds_id}'). NB: 'all scope' not recommended!")
     return missing_acls
 
 
-def verify_capabilites(
+def verify_schedule_creds_capabilities(token_inspect: TokenInspection, project: str) -> None:
+    capabilities = parse_capabilities_from_token_inspect_for_project(token_inspect, project)
+    missing = missing_session_capabilities(capabilities)
+    if missing:
+        err_msg = f"Schedule credentials missing one or more required capabilities:\n{linesep.join(missing)}"
+        logger.error(err_msg)
+        raise ValueError(err_msg)
+
+    logger.info("Schedule credentials capabilities verified!")
+
+
+def verify_deploy_capabilites(
     token_inspect: TokenInspection,
     client: CogniteClient,
     project: str,
     ds_id: int = None,
 ) -> None:
-    capabilities = list(filter(lambda c: project in c.projects, map(Capability.from_dict, token_inspect.capabilities)))
+    capabilities = parse_capabilities_from_token_inspect_for_project(token_inspect, project)
     missing = missing_function_capabilities(capabilities) + missing_files_capabilities(capabilities, client, ds_id)
     if missing:
         err_msg = f"Deploy credentials missing one or more required capabilities:\n{linesep.join(missing)}"
