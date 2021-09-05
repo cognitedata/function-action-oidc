@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 
 from cognite.client.data_classes import DataSet
+from cognite.client.data_classes.iam import TokenInspection
 from cognite.experimental import CogniteClient
 from pydantic import constr
 
@@ -46,6 +47,11 @@ def verify_path_is_directory(path: Path, parameter: str) -> Path:
     if not path.is_dir():
         raise ValueError(f"Invalid folder path for '{parameter}': '{path}', not a directory!")
     return path
+
+
+@lru_cache(None)
+def inspect_token(client: CogniteClient) -> TokenInspection:
+    return client.iam.token.inspect()
 
 
 @lru_cache(None)

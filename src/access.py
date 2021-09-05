@@ -10,7 +10,7 @@ from cognite.client.exceptions import CogniteAPIError
 from cognite.experimental import CogniteClient
 
 from exceptions import MissingAclError
-from utils import retrieve_dataset
+from utils import inspect_token, retrieve_dataset
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class Capability:
 
     @classmethod
     def from_dict(cls, dct: Dict[str, Any]) -> Capability:
-        projects = dct.pop("projectScope")["projects"]
+        projects = (dct := dct.copy()).pop("projectScope")["projects"]
         (acl,) = dct  # magic voodoo syntax to extract the only key
         return cls(acl=acl, projects=projects, **dct[acl])
 
@@ -50,7 +50,7 @@ class Capability:
         return id in map(int, self.scope.get("idScope", {}).get("ids", []))
 
 
-def parse_capabilities_from_token_inspect_for_project(token_inspect: TokenInspection, project: str):
+def parse_capabilities_from_token_inspect_for_project(token_inspect: TokenInspection, project: str) -> List[Capability]:
     return list(filter(lambda c: project in c.projects, map(Capability.from_dict, token_inspect.capabilities)))
 
 
@@ -65,7 +65,7 @@ MISSING_ACLS_WARNING = "(There might be more missing, but need the above-mention
 
 def missing_basic_capabilities(client: CogniteClient) -> List[str]:
     try:
-        token_inspect = client.iam.token.inspect()
+        token_inspect = inspect_token(client)
     except CogniteAPIError:
         # This only fails if we are missing BOTH 'project:LIST' and 'groups:LIST':
         return [ACL_PROJECT_LIST, ACL_GROUPS_LIST, MISSING_ACLS_WARNING]
@@ -132,8 +132,10 @@ def verify_schedule_creds_capabilities(client: CogniteClient, project: str) -> T
     if missing_basic := missing_basic_capabilities(client):
         raise_on_missing(missing_basic, "schedule")
 
-    token_inspect = client.iam.token.inspect()
-    capabilities = parse_capabilities_from_token_inspect_for_project(token_inspect, project)
+    capabilities = parse_capabilities_from_token_inspect_for_project(
+        (token_inspect := inspect_token(client)),
+        project=project,
+    )
     if missing := missing_session_capabilities(capabilities):
         raise_on_missing(missing, "schedule")
     logger.info("Schedule credentials capabilities verified!")
@@ -148,8 +150,10 @@ def verify_deploy_capabilites(
     if missing_basic := missing_basic_capabilities(client):
         raise_on_missing(missing_basic, "deploy")
 
-    token_inspect = client.iam.token.inspect()
-    capabilities = parse_capabilities_from_token_inspect_for_project(token_inspect, project)
+    capabilities = parse_capabilities_from_token_inspect_for_project(
+        (token_inspect := inspect_token(client)),
+        project=project,
+    )
     missing = missing_function_capabilities(capabilities) + missing_files_capabilities(capabilities, client, ds_id)
     if missing:
         raise_on_missing(missing, "deploy")
