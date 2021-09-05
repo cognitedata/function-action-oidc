@@ -15,18 +15,10 @@ from utils import retrieve_dataset
 logger = logging.getLogger(__name__)
 
 
-def verify_credentials_vs_project(client: CogniteClient, project: str, cred_name: str) -> TokenInspection:
-    try:
-        token_inspect = client.iam.token.inspect()
-    except CogniteAPIError:
-        logger.error(
-            f"Unable to call 'token/inspect'. Probable cause: {cred_name.title()} credentials wrong or missing "
-            "one or more capabilities! Requires both 'Projects:LIST' and 'Groups:LIST'!"
-        )
-        raise
+def verify_credentials_vs_project(token_inspect: TokenInspection, project: str, cred_name: str) -> None:
     # Check that given project is in the list of authenticated projects:
-    if project not in (valid_projects := [p.url_name for p in token_inspect.projects]):
-        err_msg = f"{cred_name.title()} credentials NOT verified towards given {project=}, but {valid_projects}!"
+    if project not in (valid_projs := [p.url_name for p in token_inspect.projects]):
+        err_msg = f"{cred_name.title()} credentials NOT verified towards given {project=}, but {valid_projs}!"
         logger.error(err_msg)
         raise ValueError(err_msg)
 
@@ -64,6 +56,28 @@ def parse_capabilities_from_token_inspect_for_project(token_inspect: TokenInspec
 
 def filter_capabilities(capabilities: Iterable[Capability], acl: str) -> Iterator[Capability]:
     return filter(lambda c: c.acl == acl, capabilities)
+
+
+ACL_PROJECT_LIST = "Projects:LIST (scope: 'all')"
+ACL_GROUPS_LIST = "Groups:LIST (scope: 'all' OR 'currentuserscope')"
+MISSING_ACLS_WARNING = "(There might be more missing, but need the above-mentioned first to check!)"
+
+
+def missing_basic_capabilities(client: CogniteClient) -> List[str]:
+    try:
+        token_inspect = client.iam.token.inspect()
+    except CogniteAPIError:
+        # This only fails if we are missing BOTH 'project:LIST' and 'groups:LIST':
+        return [ACL_PROJECT_LIST, ACL_GROUPS_LIST, MISSING_ACLS_WARNING]
+
+    if token_inspect.projects and token_inspect.capabilities:
+        return []
+    # We are missing one of the two, but don't know which:
+    try:
+        client.iam.groups.list()
+        return [ACL_PROJECT_LIST, MISSING_ACLS_WARNING]
+    except CogniteAPIError:
+        return [ACL_GROUPS_LIST, MISSING_ACLS_WARNING]
 
 
 def missing_function_capabilities(capabilities: Iterable[Capability]) -> List[str]:
@@ -114,25 +128,33 @@ def missing_files_capabilities(
     return missing_acls
 
 
-def verify_schedule_creds_capabilities(token_inspect: TokenInspection, project: str) -> None:
+def verify_schedule_creds_capabilities(client: CogniteClient, project: str) -> TokenInspection:
+    if missing_basic := missing_basic_capabilities(client):
+        raise_on_missing(missing_basic, "schedule")
+
+    token_inspect = client.iam.token.inspect()
     capabilities = parse_capabilities_from_token_inspect_for_project(token_inspect, project)
-    missing = missing_session_capabilities(capabilities)
-    if missing:
+    if missing := missing_session_capabilities(capabilities):
         raise_on_missing(missing, "schedule")
     logger.info("Schedule credentials capabilities verified!")
+    return token_inspect
 
 
 def verify_deploy_capabilites(
-    token_inspect: TokenInspection,
     client: CogniteClient,
     project: str,
     ds_id: int = None,
-) -> None:
+) -> TokenInspection:
+    if missing_basic := missing_basic_capabilities(client):
+        raise_on_missing(missing_basic, "deploy")
+
+    token_inspect = client.iam.token.inspect()
     capabilities = parse_capabilities_from_token_inspect_for_project(token_inspect, project)
     missing = missing_function_capabilities(capabilities) + missing_files_capabilities(capabilities, client, ds_id)
     if missing:
         raise_on_missing(missing, "deploy")
     logger.info("Deploy credentials capabilities verified!")
+    return token_inspect
 
 
 def raise_on_missing(missing: List[str], cred_type: str) -> NoReturn:

@@ -82,9 +82,9 @@ class DeployCredentials(GithubActionModel, CredentialsModel):
     def verify_credentials_and_capabilities(cls, values):
         client = create_oidc_client_from_dct(values)
         project = values["cdf_project"]
-        token_inspect = verify_credentials_vs_project(client, project, cred_name="deploy")
         data_set_id = values["data_set_id"]
-        verify_deploy_capabilites(token_inspect, client, project, ds_id=data_set_id)
+        token_inspect = verify_deploy_capabilites(client, project, ds_id=data_set_id)
+        verify_credentials_vs_project(token_inspect, project, cred_name="deploy")
         return values
 
 
@@ -110,8 +110,8 @@ class SchedulesConfig(GithubActionModel, CredentialsModel):
             )
         client = create_oidc_client_from_dct(values)
         project = values["cdf_project"]
-        token_inspect = verify_credentials_vs_project(client, project=project, cred_name="schedule")
-        verify_schedule_creds_capabilities(token_inspect, project)
+        token_inspect = verify_schedule_creds_capabilities(client, project)
+        verify_credentials_vs_project(token_inspect, project, cred_name="schedule")
         return values
 
 
