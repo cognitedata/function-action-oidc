@@ -7,7 +7,7 @@ from zipfile import ZipFile
 from cognite.client.data_classes import DataSet, FileMetadata
 from cognite.client.exceptions import CogniteAPIError
 from cognite.experimental import CogniteClient
-from retry import retry
+from retry import retry  # type: ignore
 
 from configs import FunctionConfig
 from exceptions import FunctionDeployError
