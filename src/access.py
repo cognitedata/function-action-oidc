@@ -3,12 +3,13 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from os import linesep
-from typing import Any, Dict, Iterable, Iterator, List
+from typing import Any, Dict, Iterable, Iterator, List, NoReturn
 
 from cognite.client.data_classes.iam import TokenInspection
 from cognite.client.exceptions import CogniteAPIError
 from cognite.experimental import CogniteClient
 
+from exceptions import MissingAclError
 from utils import retrieve_dataset
 
 logger = logging.getLogger(__name__)
@@ -51,10 +52,10 @@ class Capability:
         return "all" in self.scope
 
     def is_dataset_scope(self, id: int) -> bool:
-        return id in self.scope.get("datasetScope", {}).get("ids", [])
+        return id in map(int, self.scope.get("datasetScope", {}).get("ids", []))
 
     def is_ids_scope(self, id: int) -> bool:
-        return id in self.scope.get("idScope", {}).get("ids", [])
+        return id in map(int, self.scope.get("idScope", {}).get("ids", []))
 
 
 def parse_capabilities_from_token_inspect_for_project(token_inspect: TokenInspection, project: str):
@@ -117,10 +118,7 @@ def verify_schedule_creds_capabilities(token_inspect: TokenInspection, project: 
     capabilities = parse_capabilities_from_token_inspect_for_project(token_inspect, project)
     missing = missing_session_capabilities(capabilities)
     if missing:
-        err_msg = f"Schedule credentials missing one or more required capabilities:\n{linesep.join(missing)}"
-        logger.error(err_msg)
-        raise ValueError(err_msg)
-
+        raise_on_missing(missing, "schedule")
     logger.info("Schedule credentials capabilities verified!")
 
 
@@ -133,8 +131,12 @@ def verify_deploy_capabilites(
     capabilities = parse_capabilities_from_token_inspect_for_project(token_inspect, project)
     missing = missing_function_capabilities(capabilities) + missing_files_capabilities(capabilities, client, ds_id)
     if missing:
-        err_msg = f"Deploy credentials missing one or more required capabilities:\n{linesep.join(missing)}"
-        logger.error(err_msg)
-        raise ValueError(err_msg)
-
+        raise_on_missing(missing, "deploy")
     logger.info("Deploy credentials capabilities verified!")
+
+
+def raise_on_missing(missing: List[str], cred_type: str) -> NoReturn:
+    missing_info = linesep.join(f"- {i}: {s}" for i, s in enumerate(missing, 1))
+    raise MissingAclError(
+        f"{cred_type.upper()} credentials missing one (or more) required capabilities:\n{missing_info}"
+    )
