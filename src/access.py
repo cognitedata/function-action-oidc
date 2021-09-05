@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from contextlib import suppress
 from dataclasses import dataclass
 from os import linesep
 from typing import Any, Dict, Iterable, Iterator, List, NoReturn
@@ -49,16 +50,16 @@ class Capability:
         return id in map(int, self.scope.get("idScope", {}).get("ids", []))
 
 
-def parse_capabilities_from_token_inspect_for_project(token_inspect: TokenInspection, project: str) -> List[Capability]:
-    return list(filter(lambda c: project in c.projects, map(Capability.from_dict, token_inspect.capabilities)))
+def retrieve_and_parse_capabilities(client: CogniteClient, project: str) -> List[Capability]:
+    return list(filter(lambda c: project in c.projects, map(Capability.from_dict, inspect_token(client).capabilities)))
 
 
 def filter_capabilities(capabilities: Iterable[Capability], acl: str) -> Iterator[Capability]:
     return filter(lambda c: c.acl == acl, capabilities)
 
 
-ACL_PROJECT_LIST = "Projects:LIST (scope: 'all')"
-ACL_GROUPS_LIST = "Groups:LIST (scope: 'all' OR 'currentuserscope')"
+ACL_PROJECT_LIST = "projects:LIST (scope: 'all')"
+ACL_GROUPS_LIST = "groups:LIST (scope: 'all' OR 'currentuserscope')"
 MISSING_ACLS_WARNING = "(There might be more missing, but need the above-mentioned first to check!)"
 
 
@@ -72,11 +73,10 @@ def missing_basic_capabilities(client: CogniteClient) -> List[str]:
     if token_inspect.projects and token_inspect.capabilities:
         return []
     # We are missing one of the two, but don't know which:
-    try:
+    with suppress(CogniteAPIError):
         client.iam.groups.list()
         return [ACL_PROJECT_LIST, MISSING_ACLS_WARNING]
-    except CogniteAPIError:
-        return [ACL_GROUPS_LIST, MISSING_ACLS_WARNING]
+    return [ACL_GROUPS_LIST, MISSING_ACLS_WARNING]
 
 
 def missing_function_capabilities(capabilities: Iterable[Capability]) -> List[str]:
@@ -131,7 +131,7 @@ def verify_schedule_creds_capabilities(client: CogniteClient, project: str) -> T
     if missing_basic := missing_basic_capabilities(client):
         raise_on_missing(missing_basic, "schedule")
 
-    capabilities = parse_capabilities_from_token_inspect_for_project(inspect_token(client), project)
+    capabilities = retrieve_and_parse_capabilities(client, project)
     if missing := missing_session_capabilities(capabilities):
         raise_on_missing(missing, "schedule")
     logger.info("Schedule credentials capabilities verified!")
@@ -145,7 +145,7 @@ def verify_deploy_capabilites(
     if missing_basic := missing_basic_capabilities(client):
         raise_on_missing(missing_basic, "deploy")
 
-    capabilities = parse_capabilities_from_token_inspect_for_project(inspect_token(client), project)
+    capabilities = retrieve_and_parse_capabilities(client, project)
     missing = missing_function_capabilities(capabilities) + missing_files_capabilities(capabilities, client, ds_id)
     if missing:
         raise_on_missing(missing, "deploy")
