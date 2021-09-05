@@ -15,15 +15,14 @@ from utils import inspect_token, retrieve_dataset
 logger = logging.getLogger(__name__)
 
 
-def verify_credentials_vs_project(token_inspect: TokenInspection, project: str, cred_name: str) -> None:
+def verify_credentials_vs_project(client: CogniteClient, project: str, cred_name: str) -> None:
     # Check that given project is in the list of authenticated projects:
-    if project not in (valid_projs := [p.url_name for p in token_inspect.projects]):
+    if project not in (valid_projs := [p.url_name for p in inspect_token(client).projects]):
         err_msg = f"{cred_name.title()} credentials NOT verified towards given {project=}, but {valid_projs}!"
         logger.error(err_msg)
         raise ValueError(err_msg)
 
     logger.info(f"{cred_name.title()} credentials verified towards {project=}!")
-    return token_inspect
 
 
 @dataclass
@@ -132,33 +131,25 @@ def verify_schedule_creds_capabilities(client: CogniteClient, project: str) -> T
     if missing_basic := missing_basic_capabilities(client):
         raise_on_missing(missing_basic, "schedule")
 
-    capabilities = parse_capabilities_from_token_inspect_for_project(
-        (token_inspect := inspect_token(client)),
-        project=project,
-    )
+    capabilities = parse_capabilities_from_token_inspect_for_project(inspect_token(client), project)
     if missing := missing_session_capabilities(capabilities):
         raise_on_missing(missing, "schedule")
     logger.info("Schedule credentials capabilities verified!")
-    return token_inspect
 
 
 def verify_deploy_capabilites(
     client: CogniteClient,
     project: str,
     ds_id: int = None,
-) -> TokenInspection:
+):
     if missing_basic := missing_basic_capabilities(client):
         raise_on_missing(missing_basic, "deploy")
 
-    capabilities = parse_capabilities_from_token_inspect_for_project(
-        (token_inspect := inspect_token(client)),
-        project=project,
-    )
+    capabilities = parse_capabilities_from_token_inspect_for_project(inspect_token(client), project)
     missing = missing_function_capabilities(capabilities) + missing_files_capabilities(capabilities, client, ds_id)
     if missing:
         raise_on_missing(missing, "deploy")
     logger.info("Deploy credentials capabilities verified!")
-    return token_inspect
 
 
 def raise_on_missing(missing: List[str], cred_type: str) -> NoReturn:
