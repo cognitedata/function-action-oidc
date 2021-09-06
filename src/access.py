@@ -11,7 +11,7 @@ from cognite.client.exceptions import CogniteAPIError
 from cognite.experimental import CogniteClient
 
 from exceptions import MissingAclError
-from utils import inspect_token, retrieve_dataset
+from utils import inspect_token, retrieve_dataset, retrieve_groups_in_user_scope
 
 logger = logging.getLogger(__name__)
 
@@ -29,16 +29,13 @@ def verify_credentials_vs_project(client: CogniteClient, project: str, cred_name
 @dataclass
 class Capability:
     acl: str
-    version: int
     actions: List[str]
     scope: Dict[str, Any]
-    projects: List[str]
 
     @classmethod
-    def from_dict(cls, dct: Dict[str, Any]) -> Capability:
-        projects = (dct := dct.copy()).pop("projectScope")["projects"]
+    def from_dct(cls, dct: Dict[str, Any]) -> Capability:
         (acl,) = dct  # magic voodoo syntax to extract the only key
-        return cls(acl=acl, projects=projects, **dct[acl])
+        return cls(acl=acl, **dct[acl])
 
     def is_all_scope(self) -> bool:
         return "all" in self.scope
@@ -51,7 +48,12 @@ class Capability:
 
 
 def retrieve_and_parse_capabilities(client: CogniteClient, project: str) -> List[Capability]:
-    return list(filter(lambda c: project in c.projects, map(Capability.from_dict, inspect_token(client).capabilities)))
+    return list(
+        map(
+            Capability.from_dct,
+            (c for group in retrieve_groups_in_user_scope(client) for c in group.capabilities),
+        ),
+    )
 
 
 def filter_capabilities(capabilities: Iterable[Capability], acl: str) -> Iterator[Capability]:
@@ -74,7 +76,7 @@ def missing_basic_capabilities(client: CogniteClient) -> List[str]:
         return []
     # We are missing one of the two, but don't know which:
     with suppress(CogniteAPIError):
-        client.iam.groups.list()
+        retrieve_groups_in_user_scope(client)
         return [ACL_PROJECT_LIST, MISSING_ACLS_WARNING]
     return [ACL_GROUPS_LIST, MISSING_ACLS_WARNING]
 
