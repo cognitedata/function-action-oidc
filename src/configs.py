@@ -7,7 +7,7 @@ from crontab import CronSlices
 from pydantic import BaseModel, Field, root_validator, validator
 from yaml import safe_load  # type: ignore
 
-from access import verify_capabilites, verify_credentials_vs_project
+from access import verify_credentials_vs_project, verify_deploy_capabilites, verify_schedule_creds_capabilities
 from utils import (
     FnFileString,
     NonEmptyString,
@@ -82,9 +82,9 @@ class DeployCredentials(GithubActionModel, CredentialsModel):
     def verify_credentials_and_capabilities(cls, values):
         client = create_oidc_client_from_dct(values)
         project = values["cdf_project"]
-        token_inspect = verify_credentials_vs_project(client, project, cred_name="deploy")
         data_set_id = values["data_set_id"]
-        verify_capabilites(token_inspect, client, project, data_set_id=data_set_id)
+        verify_deploy_capabilites(client, project, ds_id=data_set_id)
+        verify_credentials_vs_project(client, project, cred_name="deploy")
         return values
 
 
@@ -109,7 +109,9 @@ class SchedulesConfig(GithubActionModel, CredentialsModel):
                 "Missing one or more of ['schedules_client_secret', 'schedules_client_id', 'schedules_tenant_id']"
             )
         client = create_oidc_client_from_dct(values)
-        verify_credentials_vs_project(client, project=values["cdf_project"], cred_name="schedule")
+        project = values["cdf_project"]
+        verify_schedule_creds_capabilities(client, project)
+        verify_credentials_vs_project(client, project, cred_name="schedule")
         return values
 
 

@@ -1,3 +1,7 @@
+class MissingAclError(ValueError):
+    pass
+
+
 class FunctionDeployTimeout(RuntimeError):
     pass
 
