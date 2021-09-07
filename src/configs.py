@@ -45,9 +45,9 @@ class GithubActionModel(BaseModel):
     def from_envvars(cls):
         """Magic parameter-load from env.vars. (Github Action Syntax)"""
 
-        def get_parameter(val):
+        def get_parameter(key):
             # GitHub action passes all missing arguments as empty strings:
-            return getenv(f"INPUT_{val.upper()}") or None
+            return getenv(f"INPUT_{key.upper()}") or None
 
         return cls.parse_obj({k: get_parameter(k) for k in cls.schema()["properties"]})
 
@@ -95,17 +95,32 @@ class SchedulesConfig(GithubActionModel, CredentialsModel):
     tenant_id: Optional[NonEmptyString] = Field(alias="schedules_tenant_id")
     cdf_project: NonEmptyString
     cdf_cluster: NonEmptyString
+    function_folder: Path
     schedules: Optional[List[FunctionSchedule]]
+
+    @root_validator(skip_on_failure=True)
+    def verify_schedule_file_and_parse(cls, values):
+        if (schedule_file := values["schedule_file"]) is None:
+            values["schedules"] = []
+            return values
+
+        if (path := values["function_folder"] / schedule_file).is_file():
+            with path.open() as f:
+                values["schedules"] = list(map(FunctionSchedule.parse_obj, safe_load(f)))
+        else:
+            values.update({"schedule_file": None, "schedules": []})
+            logger.warning(f"Ignoring given schedule file '{schedule_file}', path does not exist: {path.absolute()}")
+        return values
 
     @root_validator(skip_on_failure=True)
     def verify_schedule_credentials(cls, values):
         if values["schedule_file"] is None:
             return values
-        # If schedules are given, credentials must be set:
+        # A valid schedule file is given; schedule-credentials are thus required:
         c_secret, c_id, t_id = values["client_secret"], values["client_id"], values["tenant_id"]
         if None in [c_secret, c_id, t_id]:
             raise ValueError(
-                "Schedules created for OIDC functions require additional client credentials (to be used  at runtime). "
+                "Schedules created for OIDC functions require additional client credentials (to be used at runtime). "
                 "Missing one or more of ['schedules_client_secret', 'schedules_client_id', 'schedules_tenant_id']"
             )
         client = create_oidc_client_from_dct(values)
@@ -166,19 +181,3 @@ class RunConfig(BaseModel):
     deploy_creds: DeployCredentials
     schedule: SchedulesConfig
     function: FunctionConfig
-
-    @root_validator(skip_on_failure=True)
-    def verify_and_parse_schedules(cls, values) -> List[FunctionSchedule]:
-        if (schedule_file := values["schedule"].schedule_file) is None:
-            values["schedule"].schedules = []
-            return values
-
-        path = values["function"].function_folder / schedule_file
-        if not path.is_file():
-            values["schedule"].schedules = []
-            values["schedule"].schedule_file = None
-            logger.warning(f"Ignoring given schedule file '{schedule_file}', path does not exist: {path.absolute()}")
-        else:
-            with path.open() as f:
-                values["schedule"].schedules = list(map(FunctionSchedule.parse_obj, safe_load(f)))
-        return values
