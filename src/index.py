@@ -15,11 +15,11 @@ def main(config: RunConfig) -> None:
     run_checks(config.function)
 
     # Deploy code to Cognite Functions:
-    client = config.deploy_creds.experimental_client
-    fn = upload_and_create_function(client, config.function)
+    deploy_client = config.deploy_creds.experimental_client
+    fn = upload_and_create_function(deploy_client, config.function)
 
     # Deploy schedules (if any):
-    deploy_schedules(client, fn, config.schedule)
+    deploy_schedules(fn, config.schedule)
 
     # Return output parameter (GitHub magic syntax):
     print(f"::set-output name=function_external_id::{fn.external_id}")
