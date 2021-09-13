@@ -148,7 +148,11 @@ def verify_deploy_capabilites(
         raise_on_missing(missing_basic, "deploy")
 
     capabilities = retrieve_and_parse_capabilities(client, project)
-    missing = missing_function_capabilities(capabilities) + missing_files_capabilities(capabilities, client, ds_id)
+    missing = (
+        missing_function_capabilities(capabilities)
+        + missing_files_capabilities(capabilities, client, ds_id)
+        + missing_session_capabilities(capabilities)
+    )
     if missing:
         raise_on_missing(missing, "deploy")
     logger.info("Deploy credentials capabilities verified!")
