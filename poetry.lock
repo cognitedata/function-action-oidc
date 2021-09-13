@@ -52,7 +52,7 @@ requests-oauthlib = "1.3.0"
 
 [[package]]
 name = "cognite-sdk-experimental"
-version = "0.59.2"
+version = "0.60.6"
 description = "Experimental additions to the Python SDK"
 category = "main"
 optional = false
@@ -409,7 +409,7 @@ testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "0472b5ee5cd9c3e5930c54334397bbc6f01a9281b5593e9d657dd41b5a96892d"
+content-hash = "bb8da9d0b79156e56d40f238d0d7d3cdedabcb63bb0bfc0113b21c558266c57e"
 
 [metadata.files]
 "backports.entry-points-selectable" = [
@@ -433,8 +433,8 @@ cognite-sdk = [
     {file = "cognite_sdk-2.31.0-py3-none-any.whl", hash = "sha256:f413b645ac53a74762b44e3fc2215a782794eb2662ac5147cfdde271b033909d"},
 ]
 cognite-sdk-experimental = [
-    {file = "cognite-sdk-experimental-0.59.2.tar.gz", hash = "sha256:85350efa2ed75f4e1431e4fee577d71ddd66d0a339c0d95f09e4232b86ca4ef4"},
-    {file = "cognite_sdk_experimental-0.59.2-py3-none-any.whl", hash = "sha256:c8dc997d28d1866cb29a0b3bb36ef254e8093238c8aed3e29916e53a982c478f"},
+    {file = "cognite-sdk-experimental-0.60.6.tar.gz", hash = "sha256:dbfe77e6c1a310491fd2c58b4095e82468525f4f5c6162954caf2102959e1237"},
+    {file = "cognite_sdk_experimental-0.60.6-py3-none-any.whl", hash = "sha256:026be09bf9d7828a99cf7ed1488541fd35f0d06d4bbd4561dd1f4db20d7b1e3d"},
 ]
 decorator = [
     {file = "decorator-5.0.9-py3-none-any.whl", hash = "sha256:6e5c199c16f7a9f0e3a61a4a54b3d27e7dad0dbdde92b944426cb20914376323"},
