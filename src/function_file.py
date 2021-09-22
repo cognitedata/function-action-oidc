@@ -62,7 +62,7 @@ def zip_and_upload_folder(client: CogniteClient, fn_config: FunctionConfig, xid:
     if (ds_id := fn_config.data_set_id) is not None:
         ds = retrieve_dataset(client, ds_id)
         logger.info(
-            f"- Using dataset '{ds.external_id}' (ID: {ds_id}) to govern the file "
+            f"- Using dataset '{ds.name}' (ID: {ds_id}) to govern the file "
             f"(has write protection: {ds.write_protected})."
         )
     else:

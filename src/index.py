@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def main(config: RunConfig) -> None:
     # Run static analysis / other checks and pre-deployment verifications:
-    run_checks(config.function)
+    run_checks(config)
 
     # Deploy code to Cognite Functions:
     deploy_client = config.deploy_creds.experimental_client
