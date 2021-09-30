@@ -11,7 +11,7 @@ from exceptions import FunctionDeployError, FunctionDeployTimeout
 logger = logging.getLogger(__name__)
 
 
-WAIT_TIME_SEC = 1500  # 20 minutes
+WAIT_TIME_SEC = 1500  # 25 minutes
 
 
 class FunctionStatus:
