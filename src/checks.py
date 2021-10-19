@@ -37,12 +37,12 @@ def _check_token_url_is_set(config: RunConfig):
 
     for client in clients:
         project = client.config.project
-        tenant_id = config.deploy_creds.tenant_id
         try:
             resp = client.get(url=f"/api/v1/projects/{project}")
         except CogniteAPIError:
             continue
 
+        tenant_id = config.deploy_creds.tenant_id
         oidc_config = resp.json()["oidcConfiguration"]
         token_url = oidc_config.get("tokenUrl")
         if token_url is not None and tenant_id in token_url:
