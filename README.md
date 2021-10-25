@@ -23,6 +23,7 @@ This action deploys a Python function to Cognite Functions, optionally with sche
 1. `common_folder`:  The path to the folder containing code that is shared between functions. See section below for more details.
 1. `function_file`: The name of the file with your main function. Will default to `handler.py` if not given.
 1. `function_secrets`: The *name* of a Github secret that holds the base64-encoded JSON dictionary with secrets (see "secrets section").
+1. `function_deploy_timeout`: The timeout limit (in seconds) for the function deployment. Once the timeout is reached, the deployment is cancelled (an attempt to delete the function will be made). The default value can be found in the file `action-yaml`.
 1. `data_set_id`: Data set ID to use for the file uploaded to CDF (the function-associated file: *zipped code folder*). Requires two *additional* DEPLOYMENT capabilities: 'dataset:READ' and 'files:WRITE' scoped to *either* the dataset you are going to use, or 'all'. Note: If your data set is WRITE PROTECTED, you also need to add the capability 'dataset:OWNER' for it. Read more about data sets in the official documentation: [Data sets](https://docs.cognite.com/cdf/data_governance/concepts/datasets/)
 1. `description`: Additional field to describe the function.
 1. `owner`: Additional field to describe the function owner.
@@ -47,11 +48,11 @@ This action deploys a Python function to Cognite Functions, optionally with sche
 ```
 
 ### Example usage
-[IN PROGRESS] Workflow to handle incoming Pull Requests:
+Workflow to handle incoming Pull Requests:
 See our repository [`deploy-templates-oidc`](https://github.com/cognitedata/deploy-functions-oidc) for the latest CI/CD workflow examples.
 
 ### Common folder
-A common use case is that you do not want to replicate utility code between all function folders. In order to accommodate this, we copy all the contents in the folder specified by `common_folder` into the functions we upload to Cognite Functions. If this is not specified, we check if `common/` exists in the root folder and if so, _we use it_.
+A common use case is that you do not want to replicate utility code between all function folders. In order to accommodate this, we copy all the contents in the folder specified by `common_folder` (if given) into the functions we upload to Cognite Functions.
 
 #### When using a common/shared folder, make sure you don't get a name conflict in one of your functions!
 

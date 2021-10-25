@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from crontab import CronSlices
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, Field, NonNegativeInt, root_validator, validator
 from yaml import safe_load  # type: ignore
 
 from access import verify_credentials_vs_project, verify_deploy_capabilites, verify_schedule_creds_capabilities
@@ -135,6 +135,7 @@ class FunctionConfig(GithubActionModel):
     function_folder: Path
     function_secrets: Optional[Dict[str, str]]
     function_file: FnFileString
+    function_deploy_timeout: NonNegativeInt
     common_folder: Optional[Path]
     data_set_id: Optional[int]
     cpu: Optional[float]

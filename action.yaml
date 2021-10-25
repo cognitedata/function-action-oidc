@@ -49,6 +49,10 @@ inputs:
     function_secrets:
         description: Base64 encoded string of secrets in JSON format. See README/secrets.
         required: false
+    function_deploy_timeout:
+        description: Set the timeout limit in seconds for function deployment. Once reached, deployment is cancelled.
+        required: false
+        default: 1500  # 25 minutes
     schedule_file:
         description: |
             Relative path and name from (function_folder) of the file with schedules to be attached.
