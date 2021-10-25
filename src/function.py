@@ -1,8 +1,8 @@
-import contextlib
 import logging
 import time
+from contextlib import suppress
 
-from cognite.client.exceptions import CogniteAPIError
+from cognite.client.exceptions import CogniteAPIError, CogniteNotFoundError
 from cognite.experimental import CogniteClient
 from cognite.experimental.data_classes import Function
 from humanize.time import precisedelta
@@ -41,7 +41,7 @@ def await_function_deployment(fn: Function, function_deploy_timeout: int) -> Fun
         fn.update()
 
     # Attempt to cancel deployment because of timeout:
-    with contextlib.suppress(CogniteAPIError):
+    with suppress(CogniteAPIError, CogniteNotFoundError):
         fn._cognite_client.functions.delete(id=fn.id)
     timeout_msg = (
         f"Function {fn.external_id} (ID: {fn.id}) did not deploy within the given timeout-limit: "
