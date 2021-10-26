@@ -136,6 +136,7 @@ class FunctionConfig(GithubActionModel):
     function_secrets: Optional[Dict[str, str]]
     function_file: FnFileString
     common_folder: Optional[Path]
+    post_deploy_cleanup: bool
     data_set_id: Optional[int]
     cpu: Optional[float]
     memory: Optional[float]

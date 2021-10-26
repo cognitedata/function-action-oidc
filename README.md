@@ -25,6 +25,7 @@ This action deploys a Python function to Cognite Functions, optionally with sche
 1. `function_secrets`: The *name* of a Github secret that holds the base64-encoded JSON dictionary with secrets (see "secrets section").
 1. `data_set_id`: Data set ID to use for the file uploaded to CDF (the function-associated file: *zipped code folder*). Requires two *additional* DEPLOYMENT capabilities: 'dataset:READ' and 'files:WRITE' scoped to *either* the dataset you are going to use, or 'all'. Note: If your data set is WRITE PROTECTED, you also need to add the capability 'dataset:OWNER' for it. Read more about data sets in the official documentation: [Data sets](https://docs.cognite.com/cdf/data_governance/concepts/datasets/)
 1. `description`: Additional field to describe the function.
+1. `post_deploy_cleanup`: Delete the code file object from CDF Files after successful Function deployment. Defaults to true.
 1. `owner`: Additional field to describe the function owner.
 1. `cpu`: Set fractional number of CPU cores per function. **Ignored for functions running on Azure!**. See defaults and allowed values in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
 1. `memory`: Set memory per function measured in GB. **Ignored for functions running on Azure!**. See defaults and allowed values in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
