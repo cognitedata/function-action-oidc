@@ -1,6 +1,8 @@
 import logging
 import time
+from contextlib import suppress
 
+from cognite.client.exceptions import CogniteAPIError, CogniteNotFoundError
 from cognite.experimental import CogniteClient
 from cognite.experimental.data_classes import Function
 from humanize.time import precisedelta
@@ -11,19 +13,16 @@ from exceptions import FunctionDeployError, FunctionDeployTimeout
 logger = logging.getLogger(__name__)
 
 
-WAIT_TIME_SEC = 1500  # 25 minutes
-
-
 class FunctionStatus:
     # Not an exhaustive list, only what's needed:
     FAILED = "Failed"
     READY = "Ready"
 
 
-def await_function_deployment(client: CogniteClient, fn: Function, wait_time_sec: int = WAIT_TIME_SEC) -> Function:
+def await_function_deployment(fn: Function, function_deploy_timeout: int) -> Function:
     deploy_time = time.time()
     next_info_log = deploy_time + 90  # Log progress every 90 sec
-    while (now := time.time()) <= deploy_time + wait_time_sec:
+    while (now := time.time()) <= deploy_time + function_deploy_timeout:
         elapsed_time = precisedelta(now - deploy_time)
         if fn.status == FunctionStatus.READY:
             logger.info(f"Function deployment successful! Deployment took {elapsed_time}")
@@ -36,14 +35,21 @@ def await_function_deployment(client: CogniteClient, fn: Function, wait_time_sec
 
         elif now > next_info_log:
             next_info_log += 90
-            logger.info(f"- Deployment in progress, time elapsed: {elapsed_time}")
+            logger.info(f"- Deployment in progress, current status: '{fn.status}', time elapsed: {elapsed_time}")
 
         time.sleep(5)
         fn.update()
 
-    err = f"Function {fn.external_id} (ID: {fn.id}) did not deploy within {precisedelta(wait_time_sec)}."
-    logger.error(err)
-    raise FunctionDeployTimeout(err)
+    # Attempt to cancel deployment because of timeout:
+    with suppress(CogniteAPIError, CogniteNotFoundError):
+        fn._cognite_client.functions.delete(id=fn.id)
+    timeout_msg = (
+        f"Function {fn.external_id} (ID: {fn.id}) did not deploy within the given timeout-limit: "
+        f"{function_deploy_timeout} sec, and was (attempted) cancelled. You can change this timeout setting "
+        "by passing the parameter 'function_deploy_timeout' to this Github Action!"
+    )
+    logger.error(timeout_msg)
+    raise FunctionDeployTimeout(timeout_msg)
 
 
 def create_function(client: CogniteClient, file_id: int, fn_config: FunctionConfig) -> Function:

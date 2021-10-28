@@ -28,4 +28,4 @@ def upload_and_create_function(client: CogniteClient, fn_config: FunctionConfig)
 
     file_id = zip_and_upload_folder(client, fn_config, file_xid)
     fn_under_deployment = create_function(client, file_id, fn_config)
-    return await_function_deployment(client, fn_under_deployment)
+    return await_function_deployment(fn_under_deployment, fn_config.function_deploy_timeout)
