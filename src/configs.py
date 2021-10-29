@@ -49,7 +49,8 @@ class GithubActionModel(BaseModel):
             # GitHub action passes all missing arguments as empty strings:
             return getenv(f"INPUT_{key.upper()}") or None
 
-        return cls.parse_obj({k: get_parameter(k) for k in cls.schema()["properties"]})
+        expected_params = cls.schema()["properties"]
+        return cls.parse_obj({k: v for k, v in zip(expected_params, map(get_parameter, expected_params)) if v})
 
 
 class DeleteFunctionConfig(GithubActionModel):
