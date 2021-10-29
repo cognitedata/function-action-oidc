@@ -75,6 +75,12 @@ inputs:
             requires deployment credentials, 'cdf_project' and 'function_external_id' to be passed.
         default: false
         required: false
+    post_deploy_cleanup:
+        description: |
+            If true (the default), the function zip-file uploaded to CDF Files will be
+            deleted after the Function has been successfully created.
+        default: true
+        required: false
     cpu:
         description: 'Set number of CPU cores per function, e.g. 0.5. NB: Ignored for CDF projects on Azure!'
         required: false

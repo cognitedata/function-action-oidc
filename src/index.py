@@ -1,6 +1,7 @@
 import logging
 
 from checks import run_checks
+from cleanup import run_cleanup
 from configs import DeleteFunctionConfig, DeployCredentials, FunctionConfig, RunConfig, SchedulesConfig
 from orchestrator import remove_function_with_file, upload_and_create_function
 from schedule import deploy_schedules
@@ -14,12 +15,12 @@ def main(config: RunConfig) -> None:
     # Run static analysis / other checks and pre-deployment verifications:
     run_checks(config.function)
 
-    # Deploy code to Cognite Functions:
+    # Deploy code directory to Cognite Functions with schedules (if any)
+    # and await successful deployment:
     deploy_client = config.deploy_creds.experimental_client
     fn = upload_and_create_function(deploy_client, config.function)
-
-    # Deploy schedules (if any):
     deploy_schedules(fn, config.schedule)
+    run_cleanup(fn, config.function)
 
     # Return output parameter (GitHub magic syntax):
     print(f"::set-output name=function_external_id::{fn.external_id}")
