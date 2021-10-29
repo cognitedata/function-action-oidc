@@ -44,7 +44,6 @@ inputs:
         required: false
     function_file:
         description: Name of function file inside function folder, for instance, handler.py.
-        default: handler.py
         required: false
     function_secrets:
         description: Base64 encoded string of secrets in JSON format. See README/secrets.
@@ -52,7 +51,6 @@ inputs:
     function_deploy_timeout:
         description: Set the timeout limit in seconds for function deployment. Once reached, deployment is cancelled.
         required: false
-        default: 1500  # 25 minutes
     schedule_file:
         description: |
             Relative path and name from (function_folder) of the file with schedules to be attached.
@@ -73,13 +71,11 @@ inputs:
         description: |
             Short-cut that ONLY removes the function (and all schedules linked) before quitting. Only
             requires deployment credentials, 'cdf_project' and 'function_external_id' to be passed.
-        default: false
         required: false
     post_deploy_cleanup:
         description: |
             If true (the default), the function zip-file uploaded to CDF Files will be
             deleted after the Function has been successfully created.
-        default: true
         required: false
     cpu:
         description: 'Set number of CPU cores per function, e.g. 0.5. NB: Ignored for CDF projects on Azure!'

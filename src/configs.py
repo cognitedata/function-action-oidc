@@ -54,7 +54,7 @@ class GithubActionModel(BaseModel):
 
 
 class DeleteFunctionConfig(GithubActionModel):
-    remove_only: bool
+    remove_only: bool = False
     function_external_id: NonEmptyString
 
     def __bool__(self):
@@ -135,10 +135,10 @@ class FunctionConfig(GithubActionModel):
     function_external_id: NonEmptyString
     function_folder: Path
     function_secrets: Optional[Dict[str, str]]
-    function_file: FnFileString
-    function_deploy_timeout: NonNegativeInt
+    function_file: FnFileString = "handler.py"
+    function_deploy_timeout: NonNegativeInt = 1500  # 25 minutes
     common_folder: Optional[Path]
-    post_deploy_cleanup: bool
+    post_deploy_cleanup: bool = True
     data_set_id: Optional[int]
     cpu: Optional[float]
     memory: Optional[float]
