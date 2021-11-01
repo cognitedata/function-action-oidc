@@ -8,6 +8,12 @@ from pydantic import BaseModel, Field, NonNegativeInt, root_validator, validator
 from yaml import safe_load  # type: ignore
 
 from access import verify_credentials_vs_project, verify_deploy_capabilites, verify_schedule_creds_capabilities
+from defaults import (
+    DEFAULT_FUNCTION_DEPLOY_TIMEOUT,
+    DEFAULT_FUNCTION_FILE,
+    DEFAULT_POST_DEPLOY_CLEANUP,
+    DEFAULT_REMOVE_ONLY,
+)
 from utils import (
     FnFileString,
     NonEmptyString,
@@ -49,11 +55,12 @@ class GithubActionModel(BaseModel):
             # GitHub action passes all missing arguments as empty strings:
             return getenv(f"INPUT_{key.upper()}") or None
 
-        return cls.parse_obj({k: get_parameter(k) for k in cls.schema()["properties"]})
+        expected_params = cls.schema()["properties"]
+        return cls.parse_obj({k: v for k, v in zip(expected_params, map(get_parameter, expected_params)) if v})
 
 
 class DeleteFunctionConfig(GithubActionModel):
-    remove_only: bool
+    remove_only: bool = DEFAULT_REMOVE_ONLY
     function_external_id: NonEmptyString
 
     def __bool__(self):
@@ -134,10 +141,10 @@ class FunctionConfig(GithubActionModel):
     function_external_id: NonEmptyString
     function_folder: Path
     function_secrets: Optional[Dict[str, str]]
-    function_file: FnFileString
-    function_deploy_timeout: NonNegativeInt
+    function_file: FnFileString = DEFAULT_FUNCTION_FILE
+    function_deploy_timeout: NonNegativeInt = DEFAULT_FUNCTION_DEPLOY_TIMEOUT
     common_folder: Optional[Path]
-    post_deploy_cleanup: bool
+    post_deploy_cleanup: bool = DEFAULT_POST_DEPLOY_CLEANUP
     data_set_id: Optional[int]
     cpu: Optional[float]
     memory: Optional[float]

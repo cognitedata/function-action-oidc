@@ -19,14 +19,15 @@ This action deploys a Python function to Cognite Functions, optionally with sche
 1. `schedules_tenant_id`:  Tenant ID to be used at RUNTIME for the function, but ONLY for its scheduled runs!
 
 #### Optional
+All optional parameters that has default values, can be found in `src/defaults.py`, i.e. they are *not* defined in `action.yaml` because of the typical multi-deploy-pattern used with this action.
 1. `remove_only`: **Short-cut**: Deletes function along with all attached schedules. Ignores most other parameters!
 1. `common_folder`:  The path to the folder containing code that is shared between functions. See section below for more details.
 1. `function_file`: The name of the file with your main function. Will default to `handler.py` if not given.
 1. `function_secrets`: The *name* of a Github secret that holds the base64-encoded JSON dictionary with secrets (see "secrets section").
-1. `function_deploy_timeout`: The timeout limit (in seconds) for the function deployment. Once the timeout is reached, the deployment is canceled (an attempt to delete the function will be made). The default value can be found in the file `action.yaml`.
+1. `function_deploy_timeout`: The timeout limit (in seconds) for the function deployment. Once the timeout is reached, the deployment is canceled (an attempt to delete the function will be made).
 1. `data_set_id`: Data set ID to use for the file uploaded to CDF (the function-associated file: *zipped code folder*). Requires two *additional* DEPLOYMENT capabilities: 'dataset:READ' and 'files:WRITE' scoped to *either* the dataset you are going to use, or 'all'. Note: If your data set is WRITE PROTECTED, you also need to add the capability 'dataset:OWNER' for it. Read more about data sets in the official documentation: [Data sets](https://docs.cognite.com/cdf/data_governance/concepts/datasets/)
-1. `description`: Additional field to describe the function.
 1. `post_deploy_cleanup`: Delete the code file object from CDF Files after successful Function deployment. Defaults to true.
+1. `description`: Additional field to describe the function.
 1. `owner`: Additional field to describe the function owner.
 1. `cpu`: Set fractional number of CPU cores per function. **Ignored for functions running on Azure!**. See defaults and allowed values in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
 1. `memory`: Set memory per function measured in GB. **Ignored for functions running on Azure!**. See defaults and allowed values in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
