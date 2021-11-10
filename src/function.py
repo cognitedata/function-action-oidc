@@ -29,8 +29,8 @@ def await_function_deployment(fn: Function, function_deploy_timeout: int) -> Fun
             return fn
 
         elif fn.status == FunctionStatus.FAILED:
-            err_msg = f"Error message: {fn.error['message']}.\nTrace: {fn.error['trace']}"
-            logger.warning(f"Deployment failed after {elapsed_time}! {err_msg}")
+            err_msg = f"{fn.error['message']}. Trace:\n{fn.error['trace']}"
+            logger.error(f"Deployment failed after {elapsed_time}! API returned error: {err_msg}")
             raise FunctionDeployError(err_msg)
 
         elif now > next_info_log:
@@ -61,7 +61,7 @@ def create_function(client: CogniteClient, file_id: int, fn_config: FunctionConf
         logger.info("...with no extra secrets")
 
     fn = client.functions.create(file_id=file_id, **fn_config.create_fn_params())
-    logging.info(f"Function '{fn_xid}' created successfully! (ID: {fn.id}).")
+    logging.info(f"Function '{fn_xid}' created and queued for deployment! (ID: {fn.id}).")
     return fn
 
 
