@@ -30,7 +30,7 @@ def _check_handle_args(file_path: Path, fn_name: str = "handle") -> None:
                 return
             err_msg = (
                 f"In file '{file_path}', function '{fn_name}' contained illegal args: {list(bad_args)}. "
-                f"The function args must be a strict subset of: {list(HANDLE_ARGS)} (ordering is not important)"
+                f"The function args must be a subset of: {list(HANDLE_ARGS)} (ordering is not important)"
             )
             logger.error(err_msg)
             raise FunctionValidationError(err_msg)
