@@ -4,9 +4,6 @@ on:
       - 'release/*'
 
 name: Release
-defaults:
-  run:
-    shell: pwsh
 
 jobs:
   publish_to_dockerhub:
