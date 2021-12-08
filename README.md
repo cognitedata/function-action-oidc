@@ -29,6 +29,7 @@ All optional parameters that has default values, can be found in `src/defaults.p
 1. `post_deploy_cleanup`: Delete the code file object from CDF Files after successful Function deployment. Defaults to true.
 1. `description`: Additional field to describe the function.
 1. `owner`: Additional field to describe the function owner.
+1. `env_vars`: Environment variables for your function. Accepts JSON with string key/value pairs, like `{"FOO_BAR": "baz", "another_env_var": "cool"}`.
 1. `cpu`: Set fractional number of CPU cores per function. **Ignored for functions running on Azure!**. See defaults and allowed values in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
 1. `memory`: Set memory per function measured in GB. **Ignored for functions running on Azure!**. See defaults and allowed values in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
 
