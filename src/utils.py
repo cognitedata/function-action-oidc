@@ -78,6 +78,7 @@ def create_oidc_client(
         project=cdf_project,
         base_url=f"https://{cdf_cluster}.cognitedata.com",
         client_name="function-action-oidc",
+        disable_pypi_version_check=True,
     )
 
 
