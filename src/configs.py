@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from crontab import CronSlices
-from pydantic import BaseModel, Field, NonNegativeInt, root_validator, validator
+from pydantic import BaseModel, Field, Json, NonNegativeInt, root_validator, validator
 from yaml import safe_load  # type: ignore
 
 from access import verify_credentials_vs_project, verify_deploy_capabilites, verify_schedule_creds_capabilities
@@ -150,6 +150,7 @@ class FunctionConfig(GithubActionModel):
     memory: Optional[float]
     owner: Optional[NonEmptyStringMax128]
     description: Optional[NonEmptyStringMax128]
+    env_vars: Optional[Json[Dict[str, str]]]
 
     def create_fn_params(self):
         return {
@@ -161,6 +162,7 @@ class FunctionConfig(GithubActionModel):
             "cpu": self.cpu,
             "memory": self.memory,
             "description": self.description,
+            "env_vars": self.env_vars,
         }
 
     @validator("function_secrets", pre=True)

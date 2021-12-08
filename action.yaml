@@ -89,6 +89,9 @@ inputs:
     description:
         description: Set description field of a function, e.g. "This does X for Y if Z".
         required: false
+    env_vars:
+        description: Set environment variables for your function. Accepts JSON with string key/value pairs.
+        required: false
 outputs:
     function_external_id:  # id of output
         description: The external ID of the function.
