@@ -17,11 +17,11 @@ skip_glob = '^((?!py$).)*$'    # this makes sort all Python files
 
 [tool.poetry.dependencies]
 python = "^3.8"
-cognite-sdk-experimental = ">=0.60"
+cognite-sdk-experimental = ">=0.*"
 pydantic = "^1.8"
 python-crontab = "^2.5"
 PyYAML = "^5.4"
-retry = "^0.9"
+retry = "^0.*"
 humanize = "^3.11"
 pre-commit = "^2.14"
 
