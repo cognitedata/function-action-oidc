@@ -61,7 +61,7 @@ def create_function(client: CogniteClient, file_id: int, fn_config: FunctionConf
         logger.info("...with no extra secrets")
 
     fn = client.functions.create(file_id=file_id, **fn_config.create_fn_params())
-    logging.info(f"Function '{fn_xid}' created and queued for deployment! (ID: {fn.id}).")
+    logger.info(f"Function '{fn_xid}' created and queued for deployment! (ID: {fn.id}).")
     return fn
 
 
