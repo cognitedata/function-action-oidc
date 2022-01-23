@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from contextlib import suppress
 from dataclasses import dataclass
 from os import linesep
 from typing import AbstractSet, Any, Dict, Iterable, Iterator, List, NoReturn
@@ -14,16 +13,6 @@ from exceptions import MissingAclError
 from utils import inspect_token, retrieve_dataset, retrieve_groups_in_user_scope
 
 logger = logging.getLogger(__name__)
-
-
-def verify_credentials_vs_project(client: CogniteClient, project: str, cred_name: str) -> None:
-    # Check that given project is in the list of authenticated projects:
-    if project not in (valid_projs := [p.url_name for p in inspect_token(client).projects]):
-        err_msg = f"{cred_name.title()} credentials NOT verified towards given {project=}, but {valid_projs}!"
-        logger.error(err_msg)
-        raise ValueError(err_msg)
-
-    logger.info(f"{cred_name.title()} credentials verified towards {project=}!")
 
 
 @dataclass
@@ -65,20 +54,28 @@ ACL_GROUPS_LIST = "groups:LIST (scope: 'all' OR 'currentuserscope')"
 MISSING_ACLS_WARNING = "(There might be more missing, but need the above-mentioned first to check!)"
 
 
-def missing_basic_capabilities(client: CogniteClient) -> List[str]:
+def missing_basic_capabilities(client: CogniteClient, project: str, cred_name: str) -> List[str]:
+    missing = []
     try:
         token_inspect = inspect_token(client)
+        # inspect/token endpoint will not fail if credentials also have access to another CDF project:
+        if project not in set(p.url_name for p in token_inspect.projects):
+            missing.append(ACL_PROJECT_LIST)
+        else:
+            logger.info(f"{cred_name.title()} credentials verified towards {project=}!")
     except CogniteAPIError:
-        # This only fails if we are missing BOTH 'project:LIST' and 'groups:LIST':
+        # This ONLY fails if we are missing BOTH 'project:LIST' and 'groups:LIST':
         return [ACL_PROJECT_LIST, ACL_GROUPS_LIST, MISSING_ACLS_WARNING]
 
-    if token_inspect.projects and token_inspect.capabilities:
-        return []
-    # We are missing one of the two, but don't know which:
-    with suppress(CogniteAPIError):
+    try:
+        # We might still be missing groups:list:
         retrieve_groups_in_user_scope(client)
-        return [ACL_PROJECT_LIST, MISSING_ACLS_WARNING]
-    return [ACL_GROUPS_LIST, MISSING_ACLS_WARNING]
+    except CogniteAPIError:
+        missing.append(ACL_GROUPS_LIST)
+
+    if missing:
+        missing.append(MISSING_ACLS_WARNING)
+    return missing
 
 
 def missing_function_capabilities(
@@ -130,7 +127,7 @@ def missing_files_capabilities(capabs: Iterable[Capability], client: CogniteClie
 
 
 def check_basics_and_retrieve_capabilities(client: CogniteClient, project: str, cred_name: str) -> List[Capability]:
-    if missing_basic := missing_basic_capabilities(client):
+    if missing_basic := missing_basic_capabilities(client, project, cred_name):
         raise_on_missing(missing_basic, cred_name)
 
     return retrieve_and_parse_capabilities(client, project)

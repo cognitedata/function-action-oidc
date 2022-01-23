@@ -7,7 +7,7 @@ from crontab import CronSlices
 from pydantic import BaseModel, Field, Json, NonNegativeInt, root_validator, validator
 from yaml import safe_load  # type: ignore
 
-from access import verify_credentials_vs_project, verify_deploy_capabilites, verify_schedule_creds_capabilities
+from access import verify_deploy_capabilites, verify_schedule_creds_capabilities
 from defaults import (
     DEFAULT_FUNCTION_DEPLOY_TIMEOUT,
     DEFAULT_FUNCTION_FILE,
@@ -91,7 +91,6 @@ class DeployCredentials(GithubActionModel, CredentialsModel):
         project = values["cdf_project"]
         data_set_id = values["data_set_id"]
         verify_deploy_capabilites(client, project, ds_id=data_set_id)
-        verify_credentials_vs_project(client, project, cred_name="deploy")
         return values
 
 
@@ -133,7 +132,6 @@ class SchedulesConfig(GithubActionModel, CredentialsModel):
         client = create_oidc_client_from_dct(values)
         project = values["cdf_project"]
         verify_schedule_creds_capabilities(client, project)
-        verify_credentials_vs_project(client, project, cred_name="schedule")
         return values
 
 
