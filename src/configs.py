@@ -26,6 +26,9 @@ from utils import (
 
 logger = logging.getLogger(__name__)
 
+RUNNING_IN_GITHUB_ACTION = getenv("GITHUB_ACTIONS") == "true"
+RUNNING_IN_AZURE_PIPE = getenv("TF_BUILD") == "True"
+
 
 class FunctionSchedule(BaseModel):
     class Config:
@@ -51,9 +54,13 @@ class GithubActionModel(BaseModel):
     def from_envvars(cls):
         """Magic parameter-load from env.vars. (Github Action Syntax)"""
 
-        def get_parameter(key):
+        def get_parameter(key, prefix=""):
             # GitHub action passes all missing arguments as empty strings:
-            return getenv(f"INPUT_{key.upper()}") or None
+            if RUNNING_IN_AZURE_PIPE:
+                prefix = ""  # Just to point out no prefix in Azure (is protected)
+            elif RUNNING_IN_GITHUB_ACTION:
+                prefix = "INPUT_"
+            return getenv(f"{prefix}{key.upper()}") or None
 
         expected_params = cls.schema()["properties"]
         return cls.parse_obj({k: v for k, v in zip(expected_params, map(get_parameter, expected_params)) if v})
