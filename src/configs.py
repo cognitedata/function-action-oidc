@@ -26,8 +26,16 @@ from utils import (
 
 logger = logging.getLogger(__name__)
 
-RUNNING_IN_GITHUB_ACTION = getenv("GITHUB_ACTIONS") == "true"
-RUNNING_IN_AZURE_PIPE = getenv("TF_BUILD") == "True"
+if RUNNING_IN_GITHUB_ACTION := getenv("GITHUB_ACTIONS") == "true":
+    logger.info("Inferred current runtime environment to be 'Github Actions'.")
+if RUNNING_IN_AZURE_PIPE := getenv("TF_BUILD") == "True":
+    logger.info("Inferred current runtime environment to be 'Azure Pipelines'.")
+
+if RUNNING_IN_GITHUB_ACTION is RUNNING_IN_AZURE_PIPE:
+    raise RuntimeError(
+        "Unable to unambiguously infer the current runtime environment. Please create an "
+        "issue on Github: https://github.com/cognitedata/function-action-oidc/"
+    )
 
 
 class FunctionSchedule(BaseModel):
@@ -60,7 +68,7 @@ class GithubActionModel(BaseModel):
             elif RUNNING_IN_GITHUB_ACTION:
                 prefix = "INPUT_"
             # Missing args passed as empty strings, load as `None` instead:
-            return getenv(f"{prefix}{key.upper()}") or None
+            return getenv(f"{prefix}{key.upper()}", "").strip() or None
 
         expected_params = cls.schema()["properties"]
         return cls.parse_obj({k: v for k, v in zip(expected_params, map(get_parameter, expected_params)) if v})
@@ -119,10 +127,13 @@ class SchedulesConfig(GithubActionModel, CredentialsModel):
 
         if (path := values["function_folder"] / schedule_file).is_file():
             with path.open() as f:
-                values["schedules"] = list(map(FunctionSchedule.parse_obj, safe_load(f)))
+                if schedules := safe_load(f):
+                    values["schedules"] = list(map(FunctionSchedule.parse_obj, schedules))
+                    return values
+                logger.warning(f"Given schedule file '{schedule_file}' appears empty and was ignored")
         else:
-            values.update({"schedule_file": None, "schedules": []})
             logger.warning(f"Ignoring given schedule file '{schedule_file}', path does not exist: {path.absolute()}")
+        values.update({"schedule_file": None, "schedules": []})
         return values
 
     @root_validator(skip_on_failure=True)

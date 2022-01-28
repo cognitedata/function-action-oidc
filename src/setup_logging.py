@@ -2,13 +2,14 @@ import logging
 
 
 class GitHubLogHandler(logging.StreamHandler):
-    # Github only has debug, warning and error, and debug is not shown by default:
+    # Github only has debug, warning and error, and debug is not shown by default.
     # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow
     #   -commands-for-github-actions#setting-a-debug-message
+    # We thus output INFO as WARNING and WARNING (and higher) as ERROR.
 
     @staticmethod
     def log_level_to_github(level: int) -> str:
-        if level >= logging.ERROR:
+        if level >= logging.WARNING:
             return "error"
         elif level > logging.DEBUG or level == logging.NOTSET:
             return "warning"
