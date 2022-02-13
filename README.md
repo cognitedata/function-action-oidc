@@ -32,6 +32,7 @@ All optional parameters that has default values, can be found in `src/defaults.p
 1. `env_vars`: Environment variables for your function. Accepts JSON with string key/value pairs, like `{"FOO_BAR": "baz", "another_env_var": "cool"}`.
 1. `cpu`: Set fractional number of CPU cores per function. **Ignored for functions running on Azure!**. See defaults and allowed values in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
 1. `memory`: Set memory per function measured in GB. **Ignored for functions running on Azure!**. See defaults and allowed values in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
+1. `runtime`: The function runtime. Valid values are [“py37”, “py38”, “py39”, None], and None translates to the API default. See defaults and allowed values in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
 
 
 ### Schedule file format [`.yaml`]
