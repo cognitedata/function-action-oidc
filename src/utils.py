@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from functools import lru_cache
 from inspect import signature
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from cognite.client.data_classes import DataSet
 from cognite.client.data_classes.iam import GroupList, TokenInspection
@@ -70,13 +70,20 @@ def retrieve_dataset(client: CogniteClient, id: int) -> DataSet:
 
 @lru_cache(None)
 def create_oidc_client(
-    tenant_id: str, client_id: str, client_secret: str, cdf_cluster: str, cdf_project: str
+    client_id: str,
+    client_secret: str,
+    cdf_cluster: str,
+    cdf_project: str,
+    token_url: str,
+    token_custom_args: str,
+    token_scopes: List[str],
 ) -> CogniteClient:
     return CogniteClient(
-        token_url=f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token",
+        token_url=token_url,
         token_client_id=client_id,
         token_client_secret=client_secret,
-        token_scopes=[f"https://{cdf_cluster}.cognitedata.com/.default"],
+        token_scopes=token_scopes,
+        token_custom_args=token_custom_args,
         project=cdf_project,
         base_url=f"https://{cdf_cluster}.cognitedata.com",
         client_name="function-action-oidc",

@@ -73,7 +73,9 @@ class GithubActionModel(BaseModel):
             return getenv(f"{prefix}{key.upper()}", "").strip() or None
 
         expected_params = cls.schema()["properties"]
-        return cls.parse_obj({k: v for k, v in zip(expected_params, map(get_parameter, expected_params)) if v})
+        return cls.parse_obj(
+            {k: v for k, v in zip(expected_params, map(get_parameter, expected_params)) if v not in ["", None]}
+        )
 
 
 class DeleteFunctionConfig(GithubActionModel):
@@ -93,6 +95,17 @@ class CredentialsModel(BaseModel):
     def experimental_client(self):
         return create_oidc_client_from_dct(self.dict(by_alias=False))
 
+    @root_validator(skip_on_failure=True)
+    def verify_oidc_params(cls, values):
+        if values["token_url"] is None:
+            tenant_id = values["tenant_id"]
+            values["token_url"] = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
+            return values
+        if values["token_scopes"] is None:
+            cdf_cluster = values["cdf_cluster"]
+            values["token_scopes"] = [f"https://{cdf_cluster}.cognitedata.com/.default"]
+            return values
+
 
 class DeployCredentials(GithubActionModel, CredentialsModel):
     cdf_project: NonEmptyString
@@ -100,6 +113,9 @@ class DeployCredentials(GithubActionModel, CredentialsModel):
     client_id: NonEmptyString = Field(alias="deployment_client_id")
     tenant_id: NonEmptyString = Field(alias="deployment_tenant_id")
     client_secret: NonEmptyString = Field(alias="deployment_client_secret")
+    token_scopes: Optional[List[str]]
+    token_url: Optional[NonEmptyString]
+    token_custom_args: Optional[Json[Dict[str, str]]]
     data_set_id: Optional[int]  # For acl/capability checks only
 
     @root_validator(skip_on_failure=True)
@@ -118,6 +134,9 @@ class SchedulesConfig(GithubActionModel, CredentialsModel):
     tenant_id: Optional[NonEmptyString] = Field(alias="schedules_tenant_id")
     cdf_project: NonEmptyString
     cdf_cluster: NonEmptyString
+    token_scopes: Optional[List[str]]
+    token_url: Optional[NonEmptyString]
+    token_custom_args: Optional[Json[Dict[str, str]]]
     function_folder: Path
     schedules: Optional[List[FunctionSchedule]]
 
