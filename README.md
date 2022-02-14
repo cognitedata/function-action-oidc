@@ -18,6 +18,12 @@ This action deploys a Python function to Cognite Functions, optionally with sche
 1. `schedules_client_id`:  Client ID to be used at RUNTIME for the function, but ONLY for its scheduled runs!
 1. `schedules_tenant_id`:  Tenant ID to be used at RUNTIME for the function, but ONLY for its scheduled runs!
 
+#### Required *If using Aize/Custom identity provider*
+1. `token_url`: Url pointing to provider of token
+1. `token_scopes`: Must be set as [], else default Cognite scope is used
+1. `token_custom_args`: Dict of arguments used to obatin token
+1. `deployment_tenant_id` and `schedules_tenant_id` should be tenant ID provided by provider and *not* AAD tenant id.
+
 #### Optional
 All optional parameters that has default values, can be found in `src/defaults.py`, i.e. they are *not* defined in `action.yaml` because of the typical multi-deploy-pattern used with this action.
 1. `remove_only`: **Short-cut**: Deletes function along with all attached schedules. Ignores most other parameters!
