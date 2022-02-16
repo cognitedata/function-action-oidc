@@ -94,7 +94,8 @@ inputs:
         required: false
     runtime:
         description: |
-            The function runtime. Valid values are py37, py38, py39, None, in which None translates to the API default.
+            Set function runtime (Python version). Not given translates into the API default, which can be found
+            along with the allowed versions in the API documentation.
         required: false
 outputs:
     function_external_id:  # id of output
