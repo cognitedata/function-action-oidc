@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 # Pydantic fields:
+ToLowerStr = constr(to_lower=True, strip_whitespace=True)
 NonEmptyString = constr(min_length=1, strip_whitespace=True)
 NonEmptyStringMax128 = constr(min_length=1, max_length=128, strip_whitespace=True)
 YamlFileString = constr(min_length=1, strip_whitespace=True, regex=r"^[\w\- /]+\.ya?ml$")  # noqa: F722

@@ -92,6 +92,11 @@ inputs:
     env_vars:
         description: Set environment variables for your function. Accepts JSON with string key/value pairs.
         required: false
+    runtime:
+        description: |
+            Set function runtime (Python version). Not given translates into the API default, which can be found
+            along with the allowed versions in the API documentation.
+        required: false
 outputs:
     function_external_id:  # id of output
         description: The external ID of the function.

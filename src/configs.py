@@ -18,6 +18,7 @@ from utils import (
     FnFileString,
     NonEmptyString,
     NonEmptyStringMax128,
+    ToLowerStr,
     YamlFileString,
     create_oidc_client_from_dct,
     decode_and_parse,
@@ -167,6 +168,7 @@ class FunctionConfig(GithubActionModel):
     owner: Optional[NonEmptyStringMax128]
     description: Optional[NonEmptyStringMax128]
     env_vars: Optional[Json[Dict[str, str]]]
+    runtime: Optional[ToLowerStr]
 
     def create_fn_params(self):
         return {
@@ -179,6 +181,7 @@ class FunctionConfig(GithubActionModel):
             "memory": self.memory,
             "description": self.description,
             "env_vars": self.env_vars,
+            "runtime": self.runtime,
         }
 
     @validator("function_secrets", pre=True)
