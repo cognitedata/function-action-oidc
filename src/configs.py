@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from crontab import CronSlices
-from pydantic import BaseModel, Field, Json, NonNegativeInt, root_validator, validator
+from pydantic import BaseModel, Field, Json, NonNegativeFloat, NonNegativeInt, root_validator, validator
 from yaml import safe_load  # type: ignore
 
 from access import verify_deploy_capabilites, verify_schedule_creds_capabilities
@@ -163,8 +163,8 @@ class FunctionConfig(GithubActionModel):
     common_folder: Optional[Path]
     post_deploy_cleanup: bool = DEFAULT_POST_DEPLOY_CLEANUP
     data_set_id: Optional[int]
-    cpu: Optional[float]
-    memory: Optional[float]
+    cpu: Optional[NonNegativeFloat]
+    memory: Optional[NonNegativeFloat]
     owner: Optional[NonEmptyStringMax128]
     description: Optional[NonEmptyStringMax128]
     env_vars: Optional[Json[Dict[str, str]]]
