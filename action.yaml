@@ -78,10 +78,10 @@ inputs:
             deleted after the Function has been successfully created.
         required: false
     cpu:
-        description: 'Set number of CPU cores per function, e.g. 0.5. NB: Ignored for CDF projects on Azure!'
+        description: 'Set number of CPU cores per function, e.g. 0.5.'
         required: false
     memory:
-        description: 'Set memory per function measured in GB, e.g. 0.8. NB: Ignored for CDF projects on Azure!'
+        description: 'Set memory per function measured in GB, e.g. 0.8.'
         required: false
     owner:
         description: Set owner of a function, e.g. "My Client".

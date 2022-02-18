@@ -13,11 +13,11 @@ logger = logging.getLogger(__name__)
 
 def main(config: RunConfig) -> None:
     # Run static analysis / other checks and pre-deployment verifications:
-    run_checks(config.function)
+    deploy_client = config.deploy_creds.experimental_client
+    run_checks(config.function, deploy_client)
 
     # Deploy code directory to Cognite Functions with schedules (if any)
     # and await successful deployment:
-    deploy_client = config.deploy_creds.experimental_client
     fn = upload_and_create_function(deploy_client, config.function)
     deploy_schedules(fn, config.schedule)
     run_cleanup(fn, config.function)
