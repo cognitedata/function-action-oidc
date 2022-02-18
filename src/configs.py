@@ -18,6 +18,7 @@ from utils import (
     FnFileString,
     NonEmptyString,
     NonEmptyStringMax128,
+    NonEmptyStringMax500,
     ToLowerStr,
     YamlFileString,
     create_oidc_client_from_dct,
@@ -166,7 +167,7 @@ class FunctionConfig(GithubActionModel):
     cpu: Optional[NonNegativeFloat]
     memory: Optional[NonNegativeFloat]
     owner: Optional[NonEmptyStringMax128]
-    description: Optional[NonEmptyStringMax128]
+    description: Optional[NonEmptyStringMax500]
     env_vars: Optional[Json[Dict[str, str]]]
     runtime: Optional[ToLowerStr]
 
