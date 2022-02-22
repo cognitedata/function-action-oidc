@@ -100,11 +100,10 @@ class CredentialsModel(BaseModel):
         if values["token_url"] is None:
             tenant_id = values["tenant_id"]
             values["token_url"] = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
-            return values
         if values["token_scopes"] is None:
             cdf_cluster = values["cdf_cluster"]
             values["token_scopes"] = [f"https://{cdf_cluster}.cognitedata.com/.default"]
-            return values
+        return values
 
 
 class DeployCredentials(GithubActionModel, CredentialsModel):
