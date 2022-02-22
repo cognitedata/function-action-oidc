@@ -62,11 +62,11 @@ class GithubActionModel(BaseModel):
 
     @classmethod
     def from_envvars(cls):
-        """Magic parameter-load from env.vars. (Github Action Syntax)"""
+        """Magic parameter-load from env.vars. (...which is how most workflows pass params)"""
 
         def get_parameter(key, prefix=""):
             if RUNNING_IN_AZURE_PIPE:
-                prefix = ""  # Just to point out no prefix in Azure (is protected)
+                prefix = ""  # Just to point out no prefix in Azure
             elif RUNNING_IN_GITHUB_ACTION:
                 prefix = "INPUT_"
             # Missing args passed as empty strings, load as `None` instead:
@@ -74,7 +74,7 @@ class GithubActionModel(BaseModel):
 
         expected_params = cls.schema()["properties"]
         return cls.parse_obj(
-            {k: v for k, v in zip(expected_params, map(get_parameter, expected_params)) if v not in ["", None]}
+            {k: v for k, v in zip(expected_params, map(get_parameter, expected_params)) if v is not None}
         )
 
 
