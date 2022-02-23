@@ -3,6 +3,8 @@ import logging
 from pathlib import Path
 from typing import List
 
+from cognite.experimental import CogniteClient
+
 from configs import FunctionConfig
 from exceptions import FunctionValidationError
 
@@ -12,10 +14,30 @@ logger = logging.getLogger(__name__)
 HANDLE_ARGS = ("data", "client", "secrets", "function_call_info")
 
 
-def run_checks(config: FunctionConfig) -> None:
+def run_checks(config: FunctionConfig, client: CogniteClient) -> None:
     # Python-only checks:
     if config.function_file.endswith(".py"):
         _check_handle_args(config.function_folder / config.function_file)
+        _check_params_against_backend_limits(config, client)
+
+
+def _check_params_against_backend_limits(config: FunctionConfig, client: CogniteClient) -> None:
+    lims = client.functions.limits()
+    if (cpu := config.cpu) is not None:
+        if not lims.cpu_cores["min"] <= cpu <= lims.cpu_cores["max"]:
+            logger.warning(
+                f"Parameter {cpu=} seems to be outside the allowed limits (reported by the API): {lims.cpu_cores}"
+            )
+    if (memory := config.memory) is not None:
+        if not lims.memory_gb["min"] <= memory <= lims.memory_gb["max"]:
+            logger.warning(
+                f"Parameter {memory=} seems to be outside the allowed limits (reported by the API): {lims.memory_gb}"
+            )
+    if (runtime := config.runtime) not in {None, *lims.runtimes}:
+        logger.warning(
+            f"The specified Python {runtime=} is not in the list of supported runtimes "
+            f"(reported by the API): {lims.runtimes}"
+        )
 
 
 class HandleVisitor(ast.NodeVisitor):

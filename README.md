@@ -18,11 +18,12 @@ This action deploys a Python function to Cognite Functions, optionally with sche
 1. `schedules_client_id`:  Client ID to be used at RUNTIME for the function, but ONLY for its scheduled runs!
 1. `schedules_tenant_id`:  Tenant ID to be used at RUNTIME for the function, but ONLY for its scheduled runs!
 
-#### Required *If using Aize/Custom identity provider*
-1. `token_url`: Url pointing to provider of token
-1. `token_scopes`: Must be set as [], else default Cognite scope is used
-1. `token_custom_args`: Dict of arguments used to obatin token
-1. `deployment_tenant_id` and `schedules_tenant_id` should be tenant ID provided by provider and *not* AAD tenant id.
+#### Required *If using a custom identity provider*
+1. `token_url`: Url pointing to provider of token. Defaults to `https://login.microsoftonline.com/{TENANT-ID}/oauth2/v2.0/token` if not given.
+1. `token_scopes`: List of token scopes. Defaults to `[f"https://{CDF-CLUSTER}.cognitedata.com/.default"]`. *Note*: To get no token scopes, an empty list must be passed: `[]`.
+1. `token_custom_args`: Dictionary of arguments used to obtain token (use JSON). Defaults to `None`.
+**Aize-specific instructions**
+The tenant IDs you need to use, e.g. `deployment_tenant_id` and `schedules_tenant_id`, are not the *regular* Azure Active Directory tenant ID, but the one provided by your CDF-provider, e.g. Aize.
 
 #### Optional
 All optional parameters that has default values, can be found in `src/defaults.py`, i.e. they are *not* defined in `action.yaml` because of the typical multi-deploy-pattern used with this action.
@@ -36,8 +37,9 @@ All optional parameters that has default values, can be found in `src/defaults.p
 1. `description`: Additional field to describe the function.
 1. `owner`: Additional field to describe the function owner.
 1. `env_vars`: Environment variables for your function. Accepts JSON with string key/value pairs, like `{"FOO_BAR": "baz", "another_env_var": "cool"}`.
-1. `cpu`: Set fractional number of CPU cores per function. **Ignored for functions running on Azure!**. See defaults and allowed values in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
-1. `memory`: Set memory per function measured in GB. **Ignored for functions running on Azure!**. See defaults and allowed values in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
+1. `cpu`: Set fractional number of CPU cores per function. You may check the default and the allowed values (they vary with the CDF project's cloud provider) by calling the `/limits` endpoint of the [Functions API (documentation)](https://docs.cognite.com/api/playground/#operation/get-functions-limits).
+1. `memory`: Set memory per function measured in GB. You may check the default and the allowed values (they vary with the CDF project's cloud provider) by calling the `/limits` endpoint of the [Functions API (documentation)](https://docs.cognite.com/api/playground/#operation/get-functions-limits).
+1. `runtime`: The function runtime. Check the default and allowed values/versions in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
 
 
 ### Schedule file format [`.yaml`]

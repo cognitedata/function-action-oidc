@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from crontab import CronSlices
-from pydantic import BaseModel, Field, Json, NonNegativeInt, root_validator, validator
+from pydantic import BaseModel, Field, Json, NonNegativeFloat, NonNegativeInt, root_validator, validator
 from yaml import safe_load  # type: ignore
 
 from access import verify_deploy_capabilites, verify_schedule_creds_capabilities
@@ -18,6 +18,8 @@ from utils import (
     FnFileString,
     NonEmptyString,
     NonEmptyStringMax128,
+    NonEmptyStringMax500,
+    ToLowerStr,
     YamlFileString,
     create_oidc_client_from_dct,
     decode_and_parse,
@@ -26,8 +28,16 @@ from utils import (
 
 logger = logging.getLogger(__name__)
 
-RUNNING_IN_GITHUB_ACTION = getenv("GITHUB_ACTIONS") == "true"
-RUNNING_IN_AZURE_PIPE = getenv("TF_BUILD") == "True"
+if RUNNING_IN_GITHUB_ACTION := getenv("GITHUB_ACTIONS") == "true":
+    logger.info("Inferred current runtime environment to be 'Github Actions'.")
+if RUNNING_IN_AZURE_PIPE := getenv("TF_BUILD") == "True":
+    logger.info("Inferred current runtime environment to be 'Azure Pipelines'.")
+
+if RUNNING_IN_GITHUB_ACTION is RUNNING_IN_AZURE_PIPE:
+    raise RuntimeError(
+        "Unable to unambiguously infer the current runtime environment. Please create an "
+        "issue on Github: https://github.com/cognitedata/function-action-oidc/"
+    )
 
 
 class FunctionSchedule(BaseModel):
@@ -52,19 +62,19 @@ class GithubActionModel(BaseModel):
 
     @classmethod
     def from_envvars(cls):
-        """Magic parameter-load from env.vars. (Github Action Syntax)"""
+        """Magic parameter-load from env.vars. (...which is how most workflows pass params)"""
 
         def get_parameter(key, prefix=""):
             if RUNNING_IN_AZURE_PIPE:
-                prefix = ""  # Just to point out no prefix in Azure (is protected)
+                prefix = ""  # Just to point out no prefix in Azure
             elif RUNNING_IN_GITHUB_ACTION:
                 prefix = "INPUT_"
             # Missing args passed as empty strings, load as `None` instead:
-            return getenv(f"{prefix}{key.upper()}") or None
+            return getenv(f"{prefix}{key.upper()}", "").strip() or None
 
         expected_params = cls.schema()["properties"]
         return cls.parse_obj(
-            {k: v for k, v in zip(expected_params, map(get_parameter, expected_params)) if v not in ["", None]}
+            {k: v for k, v in zip(expected_params, map(get_parameter, expected_params)) if v is not None}
         )
 
 
@@ -90,11 +100,10 @@ class CredentialsModel(BaseModel):
         if values["token_url"] is None:
             tenant_id = values["tenant_id"]
             values["token_url"] = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
-            return values
         if values["token_scopes"] is None:
             cdf_cluster = values["cdf_cluster"]
             values["token_scopes"] = [f"https://{cdf_cluster}.cognitedata.com/.default"]
-            return values
+        return values
 
 
 class DeployCredentials(GithubActionModel, CredentialsModel):
@@ -138,10 +147,13 @@ class SchedulesConfig(GithubActionModel, CredentialsModel):
 
         if (path := values["function_folder"] / schedule_file).is_file():
             with path.open() as f:
-                values["schedules"] = list(map(FunctionSchedule.parse_obj, safe_load(f)))
+                if schedules := safe_load(f):
+                    values["schedules"] = list(map(FunctionSchedule.parse_obj, schedules))
+                    return values
+                logger.warning(f"Given schedule file '{schedule_file}' appears empty and was ignored")
         else:
-            values.update({"schedule_file": None, "schedules": []})
             logger.warning(f"Ignoring given schedule file '{schedule_file}', path does not exist: {path.absolute()}")
+        values.update({"schedule_file": None, "schedules": []})
         return values
 
     @root_validator(skip_on_failure=True)
@@ -170,11 +182,12 @@ class FunctionConfig(GithubActionModel):
     common_folder: Optional[Path]
     post_deploy_cleanup: bool = DEFAULT_POST_DEPLOY_CLEANUP
     data_set_id: Optional[int]
-    cpu: Optional[float]
-    memory: Optional[float]
+    cpu: Optional[NonNegativeFloat]
+    memory: Optional[NonNegativeFloat]
     owner: Optional[NonEmptyStringMax128]
-    description: Optional[NonEmptyStringMax128]
+    description: Optional[NonEmptyStringMax500]
     env_vars: Optional[Json[Dict[str, str]]]
+    runtime: Optional[ToLowerStr]
 
     def create_fn_params(self):
         return {
@@ -187,6 +200,7 @@ class FunctionConfig(GithubActionModel):
             "memory": self.memory,
             "description": self.description,
             "env_vars": self.env_vars,
+            "runtime": self.runtime,
         }
 
     @validator("function_secrets", pre=True)
