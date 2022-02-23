@@ -33,7 +33,7 @@ if RUNNING_IN_GITHUB_ACTION := getenv("GITHUB_ACTIONS") == "true":
 if RUNNING_IN_AZURE_PIPE := getenv("TF_BUILD") == "True":
     logger.info("Inferred current runtime environment to be 'Azure Pipelines'.")
 
-if RUNNING_IN_GITHUB_ACTION is RUNNING_IN_AZURE_PIPE:
+if RUNNING_IN_GITHUB_ACTION is RUNNING_IN_AZURE_PIPE:  # Hacky XOR
     raise RuntimeError(
         "Unable to unambiguously infer the current runtime environment. Please create an "
         "issue on Github: https://github.com/cognitedata/function-action-oidc/"
@@ -110,9 +110,9 @@ class DeployCredentials(GithubActionModel, CredentialsModel):
     cdf_project: NonEmptyString
     cdf_cluster: NonEmptyString
     client_id: NonEmptyString = Field(alias="deployment_client_id")
-    tenant_id: NonEmptyString = Field(alias="deployment_tenant_id")
+    tenant_id: Optional[NonEmptyString] = Field(alias="deployment_tenant_id")
     client_secret: NonEmptyString = Field(alias="deployment_client_secret")
-    token_scopes: Optional[List[str]]
+    token_scopes: Optional[Json[List[str]]]
     token_url: Optional[NonEmptyString]
     token_custom_args: Optional[Json[Dict[str, str]]]
     data_set_id: Optional[int]  # For acl/capability checks only
@@ -133,7 +133,7 @@ class SchedulesConfig(GithubActionModel, CredentialsModel):
     tenant_id: Optional[NonEmptyString] = Field(alias="schedules_tenant_id")
     cdf_project: NonEmptyString
     cdf_cluster: NonEmptyString
-    token_scopes: Optional[List[str]]
+    token_scopes: Optional[Json[List[str]]]
     token_url: Optional[NonEmptyString]
     token_custom_args: Optional[Json[Dict[str, str]]]
     function_folder: Path
@@ -161,11 +161,12 @@ class SchedulesConfig(GithubActionModel, CredentialsModel):
         if values["schedule_file"] is None:
             return values
         # A valid schedule file is given; schedule-credentials are thus required:
-        c_secret, c_id, t_id = values["client_secret"], values["client_id"], values["tenant_id"]
-        if None in [c_secret, c_id, t_id]:
+        c_secret, c_id, token_url = values["client_secret"], values["client_id"], values["token_url"]
+        if None in [c_secret, c_id, token_url]:
             raise ValueError(
                 "Schedules created for OIDC functions require additional client credentials (to be used at runtime). "
                 "Missing one or more of ['schedules_client_secret', 'schedules_client_id', 'schedules_tenant_id']"
+                "schedules_tenant_id needs to be present if token_url is not set"
             )
         client = create_oidc_client_from_dct(values)
         project = values["cdf_project"]

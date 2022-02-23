@@ -23,7 +23,7 @@ This action deploys a Python function to Cognite Functions, optionally with sche
 1. `token_scopes`: List of token scopes. Defaults to `[f"https://{CDF-CLUSTER}.cognitedata.com/.default"]`. *Note*: To get no token scopes, an empty list must be passed: `[]`.
 1. `token_custom_args`: Dictionary of arguments used to obtain token (use JSON). Defaults to `None`.
 **Aize-specific instructions**
-The tenant IDs you need to use, e.g. `deployment_tenant_id` and `schedules_tenant_id`, are not the *regular* Azure Active Directory tenant ID, but the one provided by your CDF-provider, e.g. Aize.
+Tenant IDs `deployment_tenant_id` and `schedules_tenant_id` are not required when `token_url` is fully specified e.g `https://qa.login.aize.io/oauth/token`
 
 #### Optional
 All optional parameters that has default values, can be found in `src/defaults.py`, i.e. they are *not* defined in `action.yaml` because of the typical multi-deploy-pattern used with this action.

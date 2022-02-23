@@ -68,14 +68,13 @@ def retrieve_dataset(client: CogniteClient, id: int) -> DataSet:
     raise ValueError(f"No dataset exists with ID: '{id}'")
 
 
-@lru_cache(None)
 def create_oidc_client(
     client_id: str,
     client_secret: str,
     cdf_cluster: str,
     cdf_project: str,
     token_url: str,
-    token_custom_args: str,
+    token_custom_args: Dict[str, str],
     token_scopes: List[str],
 ) -> CogniteClient:
     return CogniteClient(
