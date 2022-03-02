@@ -97,6 +97,8 @@ class CredentialsModel(BaseModel):
 
     @root_validator(skip_on_failure=True)
     def verify_oidc_params(cls, values):
+        if values["token_url"] and values["tenant_id"]:
+            logger.warning("Token_url and tenant_id is provided, tenant_id will be ignored")
         if values["token_url"] is None:
             tenant_id = values["tenant_id"]
             values["token_url"] = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
@@ -161,8 +163,8 @@ class SchedulesConfig(GithubActionModel, CredentialsModel):
         if values["schedule_file"] is None:
             return values
         # A valid schedule file is given; schedule-credentials are thus required:
-        c_secret, c_id, token_url = values["client_secret"], values["client_id"], values["token_url"]
-        if None in [c_secret, c_id, token_url]:
+        c_secret, c_id = values["client_secret"], values["client_id"]
+        if None in [c_secret, c_id]:
             raise ValueError(
                 "Schedules created for OIDC functions require additional client credentials (to be used at runtime). "
                 "Missing one or more of ['schedules_client_secret', 'schedules_client_id', 'schedules_tenant_id']"

@@ -9,7 +9,7 @@ inputs:
         required: true
     deployment_tenant_id:
         description: Tenant ID to be used for deployment of the function.
-        required: true
+        required: false
     schedules_client_secret:
         description: |
             If function is to be run with schedules, this is the client secret
@@ -34,6 +34,15 @@ inputs:
     cdf_cluster:
         description: The cluster your customer's CDF project lives in, like 'westeurope-1' or 'greenfield'.
         required: true
+    token_scopes:
+        description: List of scopes to be provided when using custom identity provider
+        required: false
+    token_custom_args:
+        description: Dictionary of arguments used to obtain token when using custom identity provider
+        required: false
+    token_url:
+        description: Url pointing to provider of token when using custom identity provider
+        required: false
     function_external_id:
         description: |
             External ID and name of function. Must be unique within the CDF project as this action
