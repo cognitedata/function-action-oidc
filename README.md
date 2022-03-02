@@ -18,7 +18,7 @@ This action deploys a Python function to Cognite Functions, optionally with sche
 1. `schedules_client_id`:  Client ID to be used at RUNTIME for the function, but ONLY for its scheduled runs!
 1. `schedules_tenant_id`:  Tenant ID to be used at RUNTIME for the function, but ONLY for its scheduled runs!
 
-#### Required *If using a custom identity provider*
+#### May be required if using a custom identity provider
 1. `token_url`: Url pointing to provider of token. Defaults to `https://login.microsoftonline.com/{TENANT-ID}/oauth2/v2.0/token` if not given.
 1. `token_scopes`: List of token scopes. Defaults to `[f"https://{CDF-CLUSTER}.cognitedata.com/.default"]`. *Note*: To get no token scopes, an empty list must be passed: `[]`.
 1. `token_custom_args`: Dictionary of arguments used to obtain token (use JSON). Defaults to `None`.
