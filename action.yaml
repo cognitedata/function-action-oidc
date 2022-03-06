@@ -8,7 +8,22 @@ inputs:
         description: Client ID to be used for deployment of the function.
         required: true
     deployment_tenant_id:
-        description: Tenant ID to be used for deployment of the function.
+        description: |
+            Tenant ID to be used for deployment of the function. If using a custom identity
+            provider, you may pass `deployment_token_url` instead.
+        required: false
+    deployment_token_url:
+        description: Url to the token provider endpoint (used with a custom identity provider).
+        required: false
+    deployment_token_scopes:
+        description: |
+            List of scopes (JSON) to be used with a custom identity provider.
+            See README for more info.
+        required: false
+    deployment_token_custom_args:
+        description: |
+            Dictionary of key-value-pairs (JSON) used to obtain a token when using
+            a custom identity provider. See README for more info.
         required: false
     schedules_client_secret:
         description: |
@@ -26,7 +41,21 @@ inputs:
         description: |
             If function is to be run with schedules, this is the tenant ID
             to be used at runtime. Not providing this while also passing schedules
-            will cause an error to be raised.
+            will cause an error to be raised. Note: If using a custom identity
+            provider, you may pass `schedules_token_url` instead.
+        required: false
+    schedules_token_url:
+        description: Url to the token provider endpoint (used with a custom identity provider).
+        required: false
+    schedules_token_scopes:
+        description: |
+            List of scopes (JSON) to be used with a custom identity provider.
+            See README for more info.
+        required: false
+    schedules_token_custom_args:
+        description: |
+            Dictionary of key-value-pairs (JSON) used to obtain a token when using
+            a custom identity provider. See README for more info.
         required: false
     cdf_project:
         description: The name of your CDF project.
@@ -34,15 +63,6 @@ inputs:
     cdf_cluster:
         description: The cluster your customer's CDF project lives in, like 'westeurope-1' or 'greenfield'.
         required: true
-    token_scopes:
-        description: List of scopes to be provided when using custom identity provider
-        required: false
-    token_custom_args:
-        description: Dictionary of arguments used to obtain token when using custom identity provider
-        required: false
-    token_url:
-        description: Url pointing to provider of token when using custom identity provider
-        required: false
     function_external_id:
         description: |
             External ID and name of function. Must be unique within the CDF project as this action
@@ -66,7 +86,7 @@ inputs:
             Not passing this parameter -> no schedules will be attached. If the passed file does not
             exist, a warning will be issued, and no schedules will be attached. On all deployments,
             all existing schedules are deleted (and recreated if there are any)! Note: Requires
-            'schedules_client_secret', 'schedules_tenant_id' and 'schedules_client_id' to be passed!
+            schedule credentials to be passed (in addition to those used for deployment)!
         required: false
     data_set_id:
         description: Data set ID to use for the file uploaded to CDF (the function-associated file, i.e. the zipped code folder)
@@ -104,7 +124,7 @@ inputs:
     runtime:
         description: |
             Set function runtime (Python version). Not given translates into the API default, which can be found
-            along with the allowed versions in the API documentation.
+            (along with the allowed versions) in the API documentation.
         required: false
 outputs:
     function_external_id:  # id of output

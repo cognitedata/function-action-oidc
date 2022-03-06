@@ -10,23 +10,21 @@ This action deploys a Python function to Cognite Functions, optionally with sche
 1. `cdf_cluster`: The cluster your customer's CDF project lives in, like `westeurope-1` or `greenfield`.
 1. `deployment_client_secret`: Client secret, only to be used for DEPLOYMENT of the function.
 1. `deployment_client_id`:  Client ID, only to be used for DEPLOYMENT of the function.
-1. `deployment_tenant_id`:  Tenant ID, only to be used for DEPLOYMENT of the function.
+1. `deployment_tenant_id`:  Tenant ID, only to be used for DEPLOYMENT of the function. *Note*: we do support custom identity providers, and so you may pass `deployment_token_url` instead. See the section below on using a custom identity provider.
 
 #### Required *if attaching schedules*
-1. `schedule_file`: File location inside `function_folder` containing a list of schedules to be attached to your function. If this file exists, *then* `schedules_client_secret`, `schedules_client_id` and `schedules_tenant_id` will be required. Note: Schedule file will be ignored with a warning if it is pointing to a non-existing file. More details in section below.
+1. `schedule_file`: File location inside `function_folder` containing a list of schedules to be attached to your function. If this file exists, *then* `schedules_client_secret` and `schedules_client_id` are required. Additionally, one of `schedules_tenant_id` and `schedules_token_url` is needed. *Note*: Schedule file will be ignored with a warning if it is pointing to a non-existing file. More details in section below.
 1. `schedules_client_secret`: Client secret to be used at RUNTIME for the function, but ONLY for its scheduled runs! **Note: Calling the function normally, still uses the caller's credentials!**.
 1. `schedules_client_id`:  Client ID to be used at RUNTIME for the function, but ONLY for its scheduled runs!
-1. `schedules_tenant_id`:  Tenant ID to be used at RUNTIME for the function, but ONLY for its scheduled runs!
+1. `schedules_tenant_id`:  Tenant ID to be used at RUNTIME for the function, but ONLY for its scheduled runs! *Note*: we do support custom identity providers, and so you may pass `schedules_token_url` instead. See the section below on using a custom identity provider.
 
 #### May be required if using a custom identity provider
-1. `token_url`: Url pointing to provider of token. Defaults to `https://login.microsoftonline.com/{TENANT-ID}/oauth2/v2.0/token` if not given.
-1. `token_scopes`: List of token scopes. Defaults to `[f"https://{CDF-CLUSTER}.cognitedata.com/.default"]`. *Note*: To get no token scopes, an empty list must be passed: `[]`.
-1. `token_custom_args`: Dictionary of arguments used to obtain token (use JSON). Defaults to `None`.
-**Aize-specific instructions**
-Tenant IDs `deployment_tenant_id` and `schedules_tenant_id` are not required when `token_url` is fully specified e.g `https://qa.login.aize.io/oauth/token`
+1. `[deployment/schedules]_token_url`: Url to the token provider endpoint. Defaults to `https://login.microsoftonline.com/{TENANT-ID}/oauth2/v2.0/token` if not given. *Note*: If tenant ID *and* token URL are passed, the tenant ID will be ignored with a warning.
+1. `[deployment/schedules]_token_scopes`: List of token scopes. Defaults to `["https://{CDF-CLUSTER}.cognitedata.com/.default"]`. *Note*: To get no token scopes, an empty list must be passed: `[]`.
+1. `[deployment/schedules]_token_custom_args`: Dictionary of parameters needed to obtain token (pass as JSON). Defaults to `None`.
 
 #### Optional
-All optional parameters that has default values, can be found in `src/defaults.py`, i.e. they are *not* defined in `action.yaml` because of the typical multi-deploy-pattern used with this action.
+All optional parameters that has default values, can be found in `src/defaults.py`, i.e. they are *not* defined in `action.yaml` because of the typical multi-function deploy pattern used with this action.
 1. `remove_only`: **Short-cut**: Deletes function along with all attached schedules. Ignores most other parameters!
 1. `common_folder`:  The path to the folder containing code that is shared between functions. See section below for more details.
 1. `function_file`: The name of the file with your main function. Will default to `handler.py` if not given.
