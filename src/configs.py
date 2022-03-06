@@ -64,7 +64,7 @@ class FunctionSchedule(BaseModel):
         return cron
 
 
-class GithubActionModel(BaseModel):
+class PipelineModel(BaseModel):
     @classmethod
     def from_envvars(cls):
         """Magic parameter-load from env.vars. (...which is how most workflows pass params)"""
@@ -83,7 +83,7 @@ class GithubActionModel(BaseModel):
         )
 
 
-class DeleteFunctionConfig(GithubActionModel):
+class DeleteFunctionConfig(PipelineModel):
     remove_only: bool = DEFAULT_REMOVE_ONLY
     function_external_id: NonEmptyString
 
@@ -123,7 +123,7 @@ class CredentialsModel(BaseModel):
         return values
 
 
-class DeployCredentials(GithubActionModel, CredentialsModel):
+class DeployCredentials(PipelineModel, CredentialsModel):
     client_id: NonEmptyString = Field(alias="deployment_client_id")
     tenant_id: Optional[NonEmptyString] = Field(alias="deployment_tenant_id")
     client_secret: NonEmptyString = Field(alias="deployment_client_secret")
@@ -145,7 +145,7 @@ class DeployCredentials(GithubActionModel, CredentialsModel):
         return values
 
 
-class SchedulesConfig(GithubActionModel, CredentialsModel):
+class SchedulesConfig(PipelineModel, CredentialsModel):
     schedule_file: Optional[YamlFileString]
     client_id: Optional[NonEmptyString] = Field(alias="schedules_client_id")
     client_secret: Optional[NonEmptyString] = Field(alias="schedules_client_secret")
@@ -199,7 +199,7 @@ class SchedulesConfig(GithubActionModel, CredentialsModel):
         return values
 
 
-class FunctionConfig(GithubActionModel):
+class FunctionConfig(PipelineModel):
     function_external_id: NonEmptyString
     function_folder: Path
     function_secrets: Optional[Dict[str, str]]
