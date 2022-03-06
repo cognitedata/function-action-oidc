@@ -19,9 +19,9 @@ This action deploys a Python function to Cognite Functions, optionally with sche
 1. `schedules_tenant_id`:  Tenant ID to be used at RUNTIME for the function, but ONLY for its scheduled runs! *Note*: we do support custom identity providers, and so you may pass `schedules_token_url` instead. See the section below on using a custom identity provider.
 
 #### May be required if using a custom identity provider
-1. `[deployment/schedules]_token_url`: Url to the token provider endpoint. Defaults to `https://login.microsoftonline.com/{TENANT-ID}/oauth2/v2.0/token` if not given. *Note*: If tenant ID *and* token URL are passed, the tenant ID will be ignored with a warning.
-1. `[deployment/schedules]_token_scopes`: List of token scopes. Defaults to `["https://{CDF-CLUSTER}.cognitedata.com/.default"]`. *Note*: To get no token scopes, an empty list must be passed: `[]`.
-1. `[deployment/schedules]_token_custom_args`: Dictionary of parameters needed to obtain token (pass as JSON). Defaults to `None`.
+1. `[deployment/schedules]_token_url`: Url to the token provider endpoint. Defaults to `https://login.microsoftonline.com/{TENANT-ID}/oauth2/v2.0/token` if not given. *Note*: If tenant ID *and* token URL are passed, the tenant ID will be ignored with a warning. In the opposite case, if neither are passed, an error is raised.
+1. `[deployment/schedules]_token_scopes`: List of token scopes (JSON). Defaults to `["https://{CDF-CLUSTER}.cognitedata.com/.default"]`. *Note*: To get no token scopes, an empty list must be passed: `'[]'`.
+1. `[deployment/schedules]_token_custom_args`: Dictionary of custom arguments needed to obtain a token (JSON). Defaults to `None` if not passed. Example: `'{"audience": "https://super-data.io/cdf"}'`
 
 #### Optional
 All optional parameters that has default values, can be found in `src/defaults.py`, i.e. they are *not* defined in `action.yaml` because of the typical multi-function deploy pattern used with this action.
