@@ -74,7 +74,7 @@ def create_oidc_client(
     cdf_cluster: str,
     cdf_project: str,
     token_url: str,
-    token_custom_args: Dict[str, str],
+    token_custom_args: Optional[Dict[str, str]],
     token_scopes: List[str],
 ) -> CogniteClient:
     return CogniteClient(

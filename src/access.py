@@ -66,7 +66,7 @@ def missing_basic_capabilities(client: CogniteClient, project: str, cred_name: s
             logger.info(f"{cred_name.title()} credentials verified towards {project=}!")
     except CogniteAPIError:
         # This ONLY fails if we are missing BOTH 'projects:LIST' and 'groups:LIST':
-        return [ACL_PROJECT_LIST, ACL_GROUPS_LIST, MISSING_ACLS_WARNING]
+        return [ACL_PROJECT_LIST, ACL_GROUPS_LIST]
 
     # We might still be missing 'groups:LIST':
     with suppress(CogniteAPIError):
