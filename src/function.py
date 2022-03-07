@@ -60,9 +60,17 @@ def create_function(client: CogniteClient, file_id: int, fn_config: FunctionConf
     else:
         logger.info("...with no extra secrets")
 
-    fn = client.functions.create(file_id=file_id, **fn_config.create_fn_params())
-    logger.info(f"Function '{fn_xid}' created and queued for deployment! (ID: {fn.id}).")
-    return fn
+    for n_try in range(1, 4):
+        try:
+            fn = client.functions.create(file_id=file_id, **fn_config.create_fn_params())
+            logger.info(f"Function '{fn_xid}' created and queued for deployment! (ID: {fn.id}).")
+            return fn
+        except CogniteAPIError as e:
+            if e.code in {503}:
+                logger.exception(f"Create function failed, will retry (attempt #{n_try}). Exception:")
+                time.sleep(n_try ** 2)  # Exp. backoff
+                continue
+            raise
 
 
 def delete_function(client: CogniteClient, xid: str):
