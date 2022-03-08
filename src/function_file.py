@@ -85,8 +85,8 @@ def delete_function_file(client: CogniteClient, xid: str):
     try:
         client.files.delete(external_id=xid)
         logger.info(f"- Delete of file '{xid}' successful!")
-    except CogniteAPIError as err:
-        reason = f"{type(err).__name__}: {err}"  # 'CogniteAPIError' does not implement dunder repr...
+    except CogniteAPIError as e:
+        reason = f"{type(e).__name__}({e})"  # 'CogniteAPIError' does not implement dunder repr...
         logger.error(
             "Unable to delete file! Trying to ignore and continue as this action will overwrite "
             f"the file later. Error message from the API: \n{reason}"
