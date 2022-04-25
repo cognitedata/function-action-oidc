@@ -68,7 +68,7 @@ def create_function(client: CogniteClient, file_id: int, fn_config: FunctionConf
         except CogniteAPIError as e:
             if e.code in {503}:
                 logger.exception(f"Create function failed, will retry (attempt #{n_try}). Exception:")
-                time.sleep(n_try ** 2)  # Exp. backoff
+                time.sleep(n_try**2)  # Exp. backoff
                 continue
             raise
 
