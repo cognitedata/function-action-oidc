@@ -57,7 +57,9 @@ MISSING_ACLS_WARNING = "(There might be more missing, but need the above-mention
 def missing_basic_capabilities(client: CogniteClient, project: str, cred_name: str) -> List[str]:
     missing = []
     try:
+        logger.error("Running token/inspect...")
         token_inspect = inspect_token(client)
+        logger.error(f"{token_inspect=}")
         # inspect/token endpoint will not fail if credentials also have access to another CDF project:
         if project not in set(p.url_name for p in token_inspect.projects):
             missing.append(ACL_PROJECT_LIST)
