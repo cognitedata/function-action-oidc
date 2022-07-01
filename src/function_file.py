@@ -43,8 +43,13 @@ def upload_zipped_code_to_files(
         data_set_id=ds.id,
         overwrite=True,
     )
-    await_file_upload_status(client, file_meta.id)
-    return file_meta
+    try:
+        await_file_upload_status(client, file_meta.id)
+        return file_meta
+    except FunctionDeployError:
+        err_msg = f"Failed to upload file ({xid}) to CDF Files"
+        logger.error(err_msg)
+        raise FunctionDeployError(err_msg)
 
 
 def zip_and_upload_folder(client: CogniteClient, fn_config: FunctionConfig, xid: str) -> int:
@@ -70,10 +75,7 @@ def zip_and_upload_folder(client: CogniteClient, fn_config: FunctionConfig, xid:
         logger.info("- No dataset will be used to govern the function zip-file!")
 
     file_meta = upload_zipped_code_to_files(client, buf.getvalue(), xid, ds)
-    if (file_id := file_meta.id) is not None:
-        logger.info(f"- File uploaded successfully ({xid})!")
-        return file_id
-    raise FunctionDeployError(f"Failed to upload file ({xid}) to CDF Files")
+    return file_meta.id
 
 
 def delete_function_file(client: CogniteClient, xid: str):
