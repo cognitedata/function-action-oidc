@@ -7,7 +7,7 @@ from zipfile import ZipFile
 from cognite.client.data_classes import DataSet, FileMetadata
 from cognite.client.exceptions import CogniteAPIError
 from cognite.experimental import CogniteClient
-from retry import retry  # type: ignore
+from retry.api import retry_call  # type: ignore
 
 from configs import FunctionConfig
 from exceptions import FunctionDeployError
@@ -23,11 +23,11 @@ def _write_files_to_zip_buffer(zf: ZipFile, directory: Path):
             zf.write(Path(dirpath) / f)
 
 
-@retry(exceptions=FunctionDeployError, tries=12, delay=2, jitter=2, max_delay=15, logger=None)
-def await_file_upload_status(client: CogniteClient, file_id: int):
+def _await_file_upload_status(client: CogniteClient, file_id: int, xid: str):
+    # To be called from within a retry-block ignoring error until it passes or tries are spent
     if not client.files.retrieve(file_id).uploaded:
         logger.info(f"- File (ID: {file_id}) not yet uploaded...")
-        raise FunctionDeployError
+        raise FunctionDeployError(f"Failed to upload file ({xid}) to CDF Files")
 
 
 def upload_zipped_code_to_files(
@@ -43,7 +43,17 @@ def upload_zipped_code_to_files(
         data_set_id=ds.id,
         overwrite=True,
     )
-    await_file_upload_status(client, file_meta.id)
+    # File upload can take some time... we are generous
+    retry_call(
+        _await_file_upload_status,
+        (client, file_meta.id, xid),
+        exceptions=FunctionDeployError,
+        tries=12,
+        delay=2,
+        jitter=2,
+        max_delay=15,
+        logger=None,
+    )
     return file_meta
 
 
@@ -70,10 +80,8 @@ def zip_and_upload_folder(client: CogniteClient, fn_config: FunctionConfig, xid:
         logger.info("- No dataset will be used to govern the function zip-file!")
 
     file_meta = upload_zipped_code_to_files(client, buf.getvalue(), xid, ds)
-    if (file_id := file_meta.id) is not None:
-        logger.info(f"- File uploaded successfully ({xid})!")
-        return file_id
-    raise FunctionDeployError(f"Failed to upload file ({xid}) to CDF Files")
+    logger.info(f"- File uploaded successfully ({xid})!")
+    return file_meta.id
 
 
 def delete_function_file(client: CogniteClient, xid: str):
