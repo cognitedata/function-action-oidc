@@ -90,7 +90,7 @@ class CredentialsModel(BaseModel):
         return self.dict(include={"client_id", "client_secret"})
 
     @property
-    def experimental_client(self):
+    def client(self):
         return create_oidc_client_from_dct(self.dict(by_alias=False))
 
 

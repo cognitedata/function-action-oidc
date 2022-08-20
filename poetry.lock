@@ -379,7 +379,7 @@ docs = ["towncrier (>=21.9)", "sphinx-rtd-theme (>=1)", "sphinx-argparse (>=0.3.
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "22ffd23a50e2a9434d5c3a2c42c52e0a1254da41128364dae83a0ab7cb7e22b6"
+content-hash = "c9447a1b1e15181d889fe221e68464e5e650db6ec63a394e959f513ea719f7fe"
 
 [metadata.files]
 certifi = [

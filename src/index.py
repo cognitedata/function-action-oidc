@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 def main(config: RunConfig) -> None:
     # Run static analysis / other checks and pre-deployment verifications:
-    deploy_client = config.deploy_creds.experimental_client
+    deploy_client = config.deploy_creds.client
     run_checks(config.function, deploy_client)
 
     # Deploy code directory to Cognite Functions with schedules (if any)
@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     # We have a short-cut for when we only need to delete a function:
     if delete_config := DeleteFunctionConfig.from_envvars():
-        remove_function_with_file(deploy_creds.experimental_client, delete_config.function_external_id)
+        remove_function_with_file(deploy_creds.client, delete_config.function_external_id)
     else:
         config = RunConfig(
             deploy_creds=deploy_creds,

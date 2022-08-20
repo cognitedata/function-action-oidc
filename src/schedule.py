@@ -1,6 +1,6 @@
 import logging
 
-from cognite.experimental.data_classes import Function
+from cognite.client.data_classes import Function
 
 from configs import SchedulesConfig
 
@@ -13,7 +13,7 @@ def deploy_schedules(fn: Function, schedule_config: SchedulesConfig):
         return
 
     logger.info(f"Attaching {len(schedules)} schedule(s) to {fn.external_id} (by ID: {fn.id})")
-    client = schedule_config.experimental_client
+    client = schedule_config.client
     for s in schedules:
         client.functions.schedules.create(
             function_id=fn.id,

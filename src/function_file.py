@@ -4,9 +4,9 @@ import os
 from pathlib import Path
 from zipfile import ZipFile
 
+from cognite.client import CogniteClient
 from cognite.client.data_classes import DataSet, FileMetadata
 from cognite.client.exceptions import CogniteAPIError
-from cognite.experimental import CogniteClient
 from retry.api import retry_call  # type: ignore
 
 from configs import FunctionConfig

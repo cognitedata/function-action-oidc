@@ -8,9 +8,9 @@ from inspect import signature
 from pathlib import Path
 from typing import Dict, Optional, Union
 
+from cognite.client import CogniteClient
 from cognite.client.data_classes import DataSet
 from cognite.client.data_classes.iam import GroupList, TokenInspection
-from cognite.experimental import CogniteClient
 from pydantic import constr
 
 logger = logging.getLogger(__name__)

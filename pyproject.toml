@@ -23,6 +23,6 @@ PyYAML = "^5.4"
 retry = "^0, >=0.9"
 humanize = "^3.11"
 pre-commit = "^2.18"
-cognite-sdk = "^4.1.1"
+cognite-sdk = {extras = ["functions"], version = "^4.1.1"}
 
 [tool.poetry.dev-dependencies]

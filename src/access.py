@@ -5,9 +5,9 @@ from dataclasses import dataclass
 from os import linesep
 from typing import AbstractSet, Any, Dict, Iterable, Iterator, List, NoReturn
 
+from cognite.client import CogniteClient
 from cognite.client.data_classes.iam import TokenInspection
 from cognite.client.exceptions import CogniteAPIError
-from cognite.experimental import CogniteClient
 
 from exceptions import MissingAclError
 from utils import inspect_token, retrieve_dataset, retrieve_groups_in_user_scope
