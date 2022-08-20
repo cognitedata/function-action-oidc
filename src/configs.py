@@ -33,7 +33,7 @@ if RUNNING_IN_GITHUB_ACTION := getenv("GITHUB_ACTIONS") == "true":
 if RUNNING_IN_AZURE_PIPE := getenv("TF_BUILD") == "True":
     logger.info("Inferred current runtime environment to be 'Azure Pipelines'.")
 
-if RUNNING_IN_GITHUB_ACTION is RUNNING_IN_AZURE_PIPE:
+if RUNNING_IN_GITHUB_ACTION is RUNNING_IN_AZURE_PIPE:  # Hacky XOR
     raise RuntimeError(
         "Unable to unambiguously infer the current runtime environment. Please create an "
         "issue on Github: https://github.com/cognitedata/function-action-oidc/"
