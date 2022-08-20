@@ -8,7 +8,9 @@ from inspect import signature
 from pathlib import Path
 from typing import Dict, Optional, Union
 
-from cognite.client import CogniteClient
+from cognite.client import ClientConfig, CogniteClient
+from cognite.client.config import global_config
+from cognite.client.credentials import OAuthClientCredentials
 from cognite.client.data_classes import DataSet
 from cognite.client.data_classes.iam import GroupList, TokenInspection
 from pydantic import constr
@@ -72,15 +74,19 @@ def retrieve_dataset(client: CogniteClient, id: int) -> DataSet:
 def create_oidc_client(
     tenant_id: str, client_id: str, client_secret: str, cdf_cluster: str, cdf_project: str
 ) -> CogniteClient:
+    global_config.disable_pypi_version_check = True
     return CogniteClient(
-        token_url=f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token",
-        token_client_id=client_id,
-        token_client_secret=client_secret,
-        token_scopes=[f"https://{cdf_cluster}.cognitedata.com/.default"],
-        project=cdf_project,
-        base_url=f"https://{cdf_cluster}.cognitedata.com",
-        client_name="function-action-oidc",
-        disable_pypi_version_check=True,
+        ClientConfig(
+            client_name="function-action-oidc",
+            base_url=f"https://{cdf_cluster}.cognitedata.com",
+            project=cdf_project,
+            credentials=OAuthClientCredentials(
+                token_url=f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token",
+                client_id=client_id,
+                client_secret=client_secret,
+                scopes=[f"https://{cdf_cluster}.cognitedata.com/.default"],
+            ),
+        )
     )
 
 
