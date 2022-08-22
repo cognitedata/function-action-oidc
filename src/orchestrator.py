@@ -1,8 +1,8 @@
 import logging
 import time
 
-from cognite.experimental import CogniteClient
-from cognite.experimental.data_classes import Function
+from cognite.client import CogniteClient
+from cognite.client.data_classes import Function
 from retry import retry  # type: ignore
 
 from configs import FunctionConfig

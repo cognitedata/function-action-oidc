@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from typing import List
 
-from cognite.experimental import CogniteClient
+from cognite.client import CogniteClient
 
 from configs import FunctionConfig
 from exceptions import FunctionValidationError

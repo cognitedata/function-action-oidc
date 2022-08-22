@@ -2,9 +2,9 @@ import logging
 import time
 from contextlib import suppress
 
+from cognite.client import CogniteClient
+from cognite.client.data_classes import Function
 from cognite.client.exceptions import CogniteAPIError, CogniteNotFoundError
-from cognite.experimental import CogniteClient
-from cognite.experimental.data_classes import Function
 from humanize.time import precisedelta
 
 from configs import FunctionConfig

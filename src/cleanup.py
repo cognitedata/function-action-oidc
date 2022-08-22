@@ -1,7 +1,7 @@
 import logging
 
+from cognite.client.data_classes import Function
 from cognite.client.exceptions import CogniteAPIError
-from cognite.experimental.data_classes import Function
 
 from configs import FunctionConfig
 from utils import create_zipfile_name
