@@ -26,3 +26,12 @@ pre-commit = "^2.18"
 cognite-sdk = {extras = ["functions"], version = "^4.1.1"}
 
 [tool.poetry.dev-dependencies]
+pytest = "^7.1"
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "src"
+]
+testpaths = [
+    "tests",
+]
