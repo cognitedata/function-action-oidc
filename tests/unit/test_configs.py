@@ -1,4 +1,5 @@
 import json
+
 import pytest
 from pydantic import ValidationError
 
@@ -32,11 +33,7 @@ class TestFunctionConfig:
         tmp_func_dir = tmp_path / test_func_xid
         tmp_func_dir.mkdir()
 
-        metadata = {
-            "version": "1.0.0",
-            "versioned": "true",
-            "released": "2022-09-14"
-        }
+        metadata = {"version": "1.0.0", "versioned": "true", "released": "2022-09-14"}
         metadata_json = json.dumps(metadata, indent=0, separators=(",", ":"))
 
         monkeypatch.setenv("input_function_external_id".upper(), test_func_xid)
@@ -57,7 +54,7 @@ class TestFunctionConfig:
             "version": "1.0.0",
             "versioned": "true",
             "released": "2022-09-14",
-            f"key_{'0'*32}": "¯\_(ツ)_/¯",
+            f"key_{'0'*32}": r"¯\_(ツ)_/¯",
         }
         metadata_json = json.dumps(metadata, indent=0, separators=(",", ":"))
 
@@ -66,7 +63,7 @@ class TestFunctionConfig:
         monkeypatch.setenv("input_metadata".upper(), metadata_json)
 
         with pytest.raises(ValidationError):
-            fc = FunctionConfig.from_envvars()
+            FunctionConfig.from_envvars()
 
     def test_create_fn_params_with_metadata(self, gh_actions_env, monkeypatch, tmp_path):
         from configs import FunctionConfig
