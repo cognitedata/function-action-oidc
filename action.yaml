@@ -97,6 +97,11 @@ inputs:
             Set function runtime (Python version). Not given translates into the API default, which can be found
             along with the allowed versions in the API documentation.
         required: false
+    metadata:
+        description: |
+            Set custom metadata for the function. Accepts JSON with string key/value pairs.
+            For example, '{"version":"1.0.0","released":"2022-09-14"}'.
+        required: false
 outputs:
     function_external_id:  # id of output
         description: The external ID of the function.

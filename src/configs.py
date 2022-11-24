@@ -17,6 +17,7 @@ from defaults import (
 from utils import (
     FnFileString,
     NonEmptyString,
+    NonEmptyStringMax32,
     NonEmptyStringMax128,
     NonEmptyStringMax500,
     ToLowerStr,
@@ -170,6 +171,7 @@ class FunctionConfig(GithubActionModel):
     description: Optional[NonEmptyStringMax500]
     env_vars: Optional[Json[Dict[str, str]]]
     runtime: Optional[ToLowerStr]
+    metadata: Optional[Json[Dict[NonEmptyStringMax32, NonEmptyStringMax500]]]
 
     def create_fn_params(self):
         return {
@@ -183,6 +185,7 @@ class FunctionConfig(GithubActionModel):
             "description": self.description,
             "env_vars": self.env_vars,
             "runtime": self.runtime,
+            "metadata": self.metadata,
         }
 
     @validator("function_secrets", pre=True)
