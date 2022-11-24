@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from os import linesep
-from typing import AbstractSet, Any, Dict, Iterable, Iterator, List, NoReturn
+from typing import AbstractSet, Any, Dict, Iterable, Iterator, List, NoReturn, Optional
 
 from cognite.client import CogniteClient
 from cognite.client.data_classes.iam import TokenInspection
@@ -100,7 +100,9 @@ def missing_session_capabilities(capabs: Iterable[Capability]) -> List[str]:
     return []
 
 
-def missing_files_capabilities(capabs: Iterable[Capability], client: CogniteClient, ds_id: int = None) -> List[str]:
+def missing_files_capabilities(
+    capabs: Iterable[Capability], client: CogniteClient, ds_id: Optional[int] = None
+) -> List[str]:
     files_capes = list(filter_capabilities(capabs, acl="filesAcl"))
     files_actions_all_scope = set(a for c in files_capes for a in c.actions if c.is_all_scope())
     missing_files_acl = set(["READ", "WRITE"]) - files_actions_all_scope
@@ -152,7 +154,7 @@ def verify_schedule_creds_capabilities(
 def verify_deploy_capabilites(
     client: CogniteClient,
     project: str,
-    ds_id: int = None,
+    ds_id: Optional[int] = None,
     cred_name: str = "deploy",
 ):
     capabs = check_basics_and_retrieve_capabilities(client, project, cred_name)
