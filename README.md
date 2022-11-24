@@ -21,7 +21,7 @@ This action deploys a Python function to Cognite Functions, optionally with sche
 #### Optional
 All optional parameters that has default values, can be found in `src/defaults.py`, i.e. they are *not* defined in `action.yaml` because of the typical multi-deploy-pattern used with this action.
 1. `remove_only`: **Short-cut**: Deletes function along with all attached schedules. Ignores most other parameters!
-1. `common_folder`:  The path to the folder containing code that is shared between functions. See section below for more details.
+1. `common_folder`:  The path to the folder containing code that is shared between functions. See section below for more details. *Note: Must be a root folder*
 1. `function_file`: The name of the file with your main function. Will default to `handler.py` if not given.
 1. `function_secrets`: The *name* of a Github secret that holds the base64-encoded JSON dictionary with secrets (see "secrets section").
 1. `function_deploy_timeout`: The timeout limit (in seconds) for the function deployment. Once the timeout is reached, the deployment is canceled (an attempt to delete the function will be made).
