@@ -1,9 +1,9 @@
 import base64
 import json
-import logging
 import os
+import time
 from contextlib import contextmanager
-from functools import lru_cache
+from functools import lru_cache, partial
 from inspect import signature
 from pathlib import Path
 from typing import Dict, Optional, Union
@@ -13,10 +13,8 @@ from cognite.client.config import global_config
 from cognite.client.credentials import OAuthClientCredentials
 from cognite.client.data_classes import DataSet
 from cognite.client.data_classes.iam import GroupList, TokenInspection
+from decorator import decorator  # type: ignore [import]
 from pydantic import constr
-
-logger = logging.getLogger(__name__)
-
 
 # Pydantic fields:
 ToLowerStr = constr(to_lower=True, strip_whitespace=True)
@@ -93,3 +91,36 @@ def create_oidc_client(
 
 def create_oidc_client_from_dct(dct):
     return create_oidc_client(**{k: dct[k] for k in signature(create_oidc_client).parameters})
+
+
+def _retry(fn, exceptions=Exception, tries=-1, delay=0, max_delay=None, backoff=1, jitter=0, logger=None):
+    while tries:
+        try:
+            return fn()
+        except exceptions as e:
+            tries -= 1
+            if not tries:
+                raise
+            if logger is not None:
+                logger.warning(f"Retrying in {delay} seconds (an exception was raised: {repr(e)})")
+            time.sleep(delay)
+            delay *= backoff
+            delay += jitter
+            if max_delay is not None:
+                delay = min(delay, max_delay)
+
+
+def retry(exceptions=Exception, tries=-1, delay=0, max_delay=None, backoff=1, jitter=0, logger=None):
+    @decorator
+    def retry_decorator(fn, *args, **kw):
+        args, kwargs = args or [], kw or {}
+        return _retry(partial(fn, *args, **kwargs), exceptions, tries, delay, max_delay, backoff, jitter, logger)
+
+    return retry_decorator
+
+
+def retry_call(
+    fn, args=None, kw=None, exceptions=Exception, tries=-1, delay=0, max_delay=None, backoff=1, jitter=0, logger=None
+):
+    args, kwargs = args or [], kw or {}
+    return _retry(partial(fn, *args, **kwargs), exceptions, tries, delay, max_delay, backoff, jitter, logger)
