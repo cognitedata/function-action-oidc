@@ -1,8 +1,9 @@
 [tool.poetry]
 name = "function-action-oidc"
-version = "1.0.0"
+version = "1.1.0"
 description = ""
 authors = ["Håkon Treider <hakon.treider@cognite.com>"]
+
 
 [tool.black]
 line-length = 120
@@ -17,16 +18,17 @@ skip_glob = '^((?!py$).)*$'    # this makes sort all Python files
 
 [tool.poetry.dependencies]
 python = "^3.8"
-pydantic = "^1.8"
-python-crontab = "^2.5"
-PyYAML = "^5.4"
-retry = "^0, >=0.9"
-humanize = "^3.11"
-pre-commit = "^2.18"
-cognite-sdk = {extras = ["functions"], version = "^4.5"}
 
-[tool.poetry.dev-dependencies]
-pytest = "^7.1"
+pydantic = "^1.10"
+python-crontab = "^2.7"
+pyyaml = "^6.0"
+humanize = "^4.4"
+pre-commit = "^2.21"
+decorator = "^5.1"
+cognite-sdk = {version = "^5.1", extras = ["functions"]}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2"
 
 [tool.pytest.ini_options]
 pythonpath = [

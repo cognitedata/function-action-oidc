@@ -7,11 +7,10 @@ from zipfile import ZipFile
 from cognite.client import CogniteClient
 from cognite.client.data_classes import DataSet, FileMetadata
 from cognite.client.exceptions import CogniteAPIError
-from retry.api import retry_call  # type: ignore
 
 from configs import FunctionConfig
 from exceptions import FunctionDeployError
-from utils import retrieve_dataset, temporary_chdir
+from utils import retrieve_dataset, retry_call, temporary_chdir
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +51,7 @@ def upload_zipped_code_to_files(
         delay=2,
         jitter=2,
         max_delay=15,
-        logger=None,
+        logger=logger,
     )
     return file_meta
 
