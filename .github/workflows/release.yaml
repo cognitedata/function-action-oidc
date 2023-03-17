@@ -33,7 +33,7 @@ jobs:
       name: "Parse version from ref"
       run: | # Returns the last component of the ref path, e.g. 'refs/tags/release/1.2.3-beta' -> '1.2.3-beta'
         $version = split-path -leaf $env:GITHUB_REF
-        echo "::set-output name=version::$version"
+        echo "version=$version" >> $GITHUB_OUTPUT
     - name: "Build and push Docker image"
       uses: docker/build-push-action@v2
       with:

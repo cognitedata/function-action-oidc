@@ -1,4 +1,5 @@
 import logging
+import os
 
 from checks import run_checks
 from cleanup import run_cleanup
@@ -22,8 +23,9 @@ def main(config: RunConfig) -> None:
     deploy_schedules(fn, config.schedule)
     run_cleanup(fn, config.function)
 
-    # Return output parameter (GitHub magic syntax):
-    print(f"::set-output name=function_external_id::{fn.external_id}")
+    # Return output parameter:
+    with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+        print(f"function_external_id={fn.external_id}", file=fh)
 
 
 if __name__ == "__main__":
