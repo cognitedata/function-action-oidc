@@ -104,12 +104,12 @@ inputs:
         required: false
     index_url:
         description: |
-            Index URL for Python Package Manager to use. Be aware of the intrinsic security 
+            Index URL for Python Package Manager to use. Be aware of the intrinsic security
             implications of using the index_url option
         required: false
     extra_index_urls:
         description: |
-            Extra Index URLs for Python Package Manager to use. Be aware of the intrinsic security 
+            Extra Index URLs for Python Package Manager to use. Be aware of the intrinsic security
             implications of using the extra_index_urls option.
         required: false
 outputs:
