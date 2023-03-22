@@ -110,7 +110,8 @@ inputs:
     extra_index_urls:
         description: |
             Extra Index URLs for Python Package Manager to use. Be aware of the intrinsic security
-            implications of using the extra_index_urls option.
+            implications of using the extra_index_urls option. Accepts JSON encoded list of strings,
+            for example: '["http://foo.bar", "https://bar.baz"]'
         required: false
 outputs:
     function_external_id:  # id of output
