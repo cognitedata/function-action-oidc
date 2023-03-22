@@ -172,6 +172,8 @@ class FunctionConfig(GithubActionModel):
     env_vars: Optional[Json[Dict[str, str]]]
     runtime: Optional[ToLowerStr]
     metadata: Optional[Json[Dict[NonEmptyStringMax32, NonEmptyStringMax500]]]
+    index_url: Optional[str]
+    extra_index_urls: Optional[List[str]]
 
     def create_fn_params(self):
         return {
@@ -186,6 +188,8 @@ class FunctionConfig(GithubActionModel):
             "env_vars": self.env_vars,
             "runtime": self.runtime,
             "metadata": self.metadata,
+            "index_url": self.index_url,
+            "extra_index_urls": self.extra_index_urls,
         }
 
     @validator("function_secrets", pre=True)

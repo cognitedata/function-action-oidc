@@ -34,6 +34,8 @@ All optional parameters that has default values, can be found in `src/defaults.p
 1. `memory`: Set memory per function measured in GB. You may check the default and the allowed values (they vary with the CDF project's cloud provider) by calling the `/limits` endpoint of the [Functions API (documentation)](https://docs.cognite.com/api/playground/#operation/get-functions-limits).
 1. `runtime`: The function runtime. Check the default and allowed values/versions in the [API documentation](https://docs.cognite.com/api/playground/#operation/post-api-playground-projects-project-functions).
 1. `metadata`: Set custom metadata for the function. Accepts JSON with string key/value pairs. For example, `'{"version":"1.0.0","released":"2022-09-14"}'`. Check the [API documentation](https://cognite-sdk-python.readthedocs-hosted.com/en/latest/cognite.html#cognite.client._api.functions.FunctionsAPI.create) for allowed values and limitations.
+1. `index_url`: Index URL for Python Package Manager to use. Be aware of the intrinsic security implications of using the index_url option. Check the [API documentation](https://cognite-sdk-python.readthedocs-hosted.com/en/latest/cognite.html#cognite.client._api.functions.FunctionsAPI.create) for allowed values and limitations.
+1. `extra_index_urls`: Extra Index URLs for Python Package Manager to use. Be aware of the intrinsic security implications of using the extra_index_urls option. Check the [API documentation](https://cognite-sdk-python.readthedocs-hosted.com/en/latest/cognite.html#cognite.client._api.functions.FunctionsAPI.create) for allowed values and limitations.
 
 
 ### Schedule file format [`.yaml`]
