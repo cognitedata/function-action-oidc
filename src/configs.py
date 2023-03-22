@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from crontab import CronSlices
-from pydantic import BaseModel, Field, Json, NonNegativeFloat, NonNegativeInt, root_validator, validator
+from pydantic import BaseModel, Field, HttpUrl, Json, NonNegativeFloat, NonNegativeInt, root_validator, validator
 from yaml import safe_load  # type: ignore
 
 from access import verify_deploy_capabilites, verify_schedule_creds_capabilities
@@ -172,8 +172,14 @@ class FunctionConfig(GithubActionModel):
     env_vars: Optional[Json[Dict[str, str]]]
     runtime: Optional[ToLowerStr]
     metadata: Optional[Json[Dict[NonEmptyStringMax32, NonEmptyStringMax500]]]
+    index_url: Optional[HttpUrl]
+    extra_index_urls: Optional[Json[List[HttpUrl]]]
 
     def create_fn_params(self):
+        if (index_url := self.index_url) is not None:
+            index_url = str(index_url)
+        if (extra_index_urls := self.extra_index_urls) is not None:
+            extra_index_urls = list(map(str, extra_index_urls))
         return {
             "secrets": self.function_secrets,
             "name": self.function_external_id,
@@ -186,6 +192,8 @@ class FunctionConfig(GithubActionModel):
             "env_vars": self.env_vars,
             "runtime": self.runtime,
             "metadata": self.metadata,
+            "index_url": index_url,
+            "extra_index_urls": extra_index_urls,
         }
 
     @validator("function_secrets", pre=True)
