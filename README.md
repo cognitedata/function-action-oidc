@@ -59,7 +59,7 @@ Workflow to handle incoming Pull Requests:
 See our repository [`deploy-templates-oidc`](https://github.com/cognitedata/deploy-functions-oidc) for the latest CI/CD workflow examples.
 
 ### Common folder
-A common use case is that you do not want to replicate utility code between all function folders. In order to accommodate this, we copy all the contents in the folder specified by `common_folder` (if given) into the functions we upload to Cognite Functions. If `common_folder` is not provided, only the function folder is packed into the zip file.
+A common use case is that you do not want to replicate utility code between all function folders. In order to accommodate this, we copy all the contents in the folder specified by `common_folder` into the functions we upload to Cognite Functions. If `common_folder` *is not provided*, only the function folder is packed into the zip file.
 
 #### When using a common/shared folder, make sure you don't get a name conflict in one of your functions!
 
