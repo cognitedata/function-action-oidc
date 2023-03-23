@@ -24,7 +24,7 @@ def main(config: RunConfig) -> None:
     run_cleanup(fn, config.function)
 
     # Return output parameter:
-    with open(os.environ["GITHUB_STATE"], "a") as fh:
+    with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
         print(f"function_external_id={fn.external_id}", file=fh)
 
 
