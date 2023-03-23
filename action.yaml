@@ -114,7 +114,7 @@ inputs:
             for example: '["http://foo.bar", "https://bar.baz"]'
         required: false
 outputs:
-    function_external_id:  # id of output
+    function_external_id:
         description: The external ID of the function.
 runs:
     using: docker
