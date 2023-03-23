@@ -40,4 +40,4 @@ jobs:
         context: .
         push: true
         file: ./Dockerfile-azure-pipelines
-        tags: cognite/function-action:${{ steps. parse_version.outputs.version }}
+        tags: cognite/function-action:${{ steps.parse_version.outputs.version }}
