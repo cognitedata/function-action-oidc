@@ -19,7 +19,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: "Set up Docker Buildx"
-      uses: docker/setup-buildx-action@v1
+      uses: docker/setup-buildx-action@v2
       with:
         install: true
 
@@ -33,7 +33,7 @@ jobs:
       name: "Parse version from ref"
       run: | # Returns the last component of the ref path, e.g. 'refs/tags/release/1.2.3-beta' -> '1.2.3-beta'
         $version = split-path -leaf $env:GITHUB_REF_NAME
-        echo "version=$version" >> $GITHUB_STATE
+        echo "version=$version" >> $env:GITHUB_STATE
 
     - name: "Build and push Docker image"
       uses: docker/build-push-action@v2
