@@ -64,8 +64,7 @@ inputs:
         required: false
     common_folder:
         description: |
-            Directory which contains code used by multiple functions. If not specified, will default
-            to 'common' (if it exists).
+            Directory which contains code used by multiple functions. If not provided, only the function folder is packed into the zip file.
         required: false
     remove_only:
         description: |
