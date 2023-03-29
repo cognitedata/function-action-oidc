@@ -49,4 +49,4 @@ jobs:
         context: .
         push: true
         file: ./Dockerfile
-        tags: cognite/function-action:${{ steps.parse_version.outputs.version }}
+        tags: cognite/function-action:${{ steps.parse_version.outputs.version }}-github
