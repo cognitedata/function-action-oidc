@@ -48,5 +48,5 @@ jobs:
       with:
         context: .
         push: true
-        file: ./Dockerfile
+        file: ./Dockerfile-github-actions
         tags: cognite/function-action:${{ steps.parse_version.outputs.version }}-github
