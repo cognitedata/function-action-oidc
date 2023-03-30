@@ -117,4 +117,4 @@ outputs:
         description: The external ID of the function.
 runs:
     using: docker
-    image: Dockerfile
+    image: docker://cognite/function-action:v1-github

@@ -35,10 +35,18 @@ jobs:
         $version = split-path -leaf $env:GITHUB_REF_NAME
         echo "version=$version" >> $env:GITHUB_OUTPUT
 
-    - name: "Build and push Docker image"
+    - name: "Build and push Docker image for Azure Pipelines"
       uses: docker/build-push-action@v2
       with:
         context: .
         push: true
         file: ./Dockerfile-azure-pipelines
-        tags: cognite/function-action:${{ steps.parse_version.outputs.version }}
+        tags: cognite/function-action:${{ steps.parse_version.outputs.version }}-azure
+
+    - name: "Build and push Docker image for Github Actions"
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        push: true
+        file: ./Dockerfile-github-actions
+        tags: cognite/function-action:${{ steps.parse_version.outputs.version }}-github
