@@ -1,6 +1,7 @@
 import io
 import logging
 import os
+import time
 from pathlib import Path
 from zipfile import ZipFile
 
@@ -43,6 +44,7 @@ def upload_zipped_code_to_files(
         overwrite=True,
     )
     # File upload can take some time... we are generous
+    time.sleep(2)
     retry_call(
         _await_file_upload_status,
         (client, file_meta.id, xid),
