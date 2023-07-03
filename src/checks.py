@@ -73,7 +73,15 @@ def _check_handle_args(file_path: Path, fn_name: str = "handle") -> None:
     with file_path.open() as f:
         file = f.read()
 
-    (node_visitor := HandleVisitor(file_path)).visit(ast.parse(file))
+    try:
+        (node_visitor := HandleVisitor(file_path)).visit(ast.parse(file))
+    except SyntaxError:
+        logger.error(
+            f"Unable to parse file '{file_path}' and check for valid handle args! Please open an issue "
+            "on github.com/cognitedata/function-action-oidc"
+        )
+        return
+
     if not node_visitor.handle_found:
         err_msg = (
             f"Required function named '{fn_name}' was not found in file '{file_path}' "
