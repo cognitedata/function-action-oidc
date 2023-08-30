@@ -23,7 +23,12 @@ class Capability:
 
     @classmethod
     def from_dct(cls, dct: Dict[str, Any]) -> Capability:
-        (acl,) = dct  # magic voodoo syntax to extract the only key
+        acl, *unexpected = dct
+        if unexpected:
+            acls = [k for k in dct if k.endswith("Acl")]
+            if len(acls) != 1:
+                raise MissingAclError(f"Unable to parse Acl for {dct}")
+            (acl,) = acls
         return cls(acl=acl, **dct[acl])
 
     def is_all_scope(self) -> bool:
