@@ -97,14 +97,14 @@ def _retry(fn, exceptions=Exception, tries=-1, delay=0, max_delay=None, backoff=
     while tries:
         try:
             return fn()
-        except exceptions as e:
+        except exceptions:
             tries -= 1
             if logger is not None:
                 logger.error("Check out the troubleshoot guide: https://docs.cognite.com/cdf/functions/known_issues")
             if not tries:
                 raise
             if logger is not None:
-                logger.warning(f"Retrying in {delay} seconds (an exception was raised: {repr(e)})")
+                logger.warning(f"Retrying in {delay} seconds...")
             time.sleep(delay)
             delay *= backoff
             delay += jitter
