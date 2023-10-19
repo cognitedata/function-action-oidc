@@ -99,6 +99,8 @@ def _retry(fn, exceptions=Exception, tries=-1, delay=0, max_delay=None, backoff=
             return fn()
         except exceptions as e:
             tries -= 1
+            if logger is not None:
+                logger.error("Check out the troubleshoot guide: https://docs.cognite.com/cdf/functions/known_issues")
             if not tries:
                 raise
             if logger is not None:

@@ -19,7 +19,7 @@ def remove_function_with_file(client: CogniteClient, fn_xid: str):
     time.sleep(3)  # Tiny breather
 
 
-@retry(exceptions=FunctionDeployError, tries=3, delay=5, backoff=2, logger=logger)
+@retry(exceptions=FunctionDeployError, tries=2, delay=5, backoff=2, logger=logger)
 def upload_and_create_function(client: CogniteClient, fn_config: FunctionConfig) -> Function:
     fn_xid = fn_config.function_external_id
     remove_function_with_file(client, fn_xid)
