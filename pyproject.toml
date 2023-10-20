@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "function-action-oidc"
-version = "1.1.0"
+version = "1.1.1"
 description = ""
 authors = ["Håkon Treider <hakon.treider@cognite.com>"]
 
 
 [tool.black]
 line-length = 120
-target_version = ['py38']
+target_version = ['py311']
 include = '\.py$'
 
 [tool.isort]
@@ -17,7 +17,7 @@ include_trailing_comma=true    # corresponds to -tc flag
 skip_glob = '^((?!py$).)*$'    # this makes sort all Python files
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.11"
 
 pydantic = "^1"
 python-crontab = ">=2.7"
