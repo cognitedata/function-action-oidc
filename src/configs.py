@@ -216,8 +216,6 @@ class FunctionConfig(GithubActionModel):
             logger.info("No 'common code' directory added to the function!")
         else:
             verify_path_is_directory(common_folder, "common_folder")
-            if len(Path(common_folder).parts) > 1:
-                raise ValueError(f"Common folder: '{common_folder}' cannot be a nested folder")
         return values
 
 
