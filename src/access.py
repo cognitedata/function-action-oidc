@@ -45,7 +45,7 @@ def retrieve_and_parse_capabilities(client: CogniteClient, project: str) -> List
     return list(
         map(
             Capability.from_dct,
-            (c for group in retrieve_groups_in_user_scope(client) for c in group.capabilities),
+            (c.dump() for group in retrieve_groups_in_user_scope(client) for c in group.capabilities),
         ),
     )
 
