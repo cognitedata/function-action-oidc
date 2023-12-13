@@ -11,16 +11,9 @@ from cognite.client.exceptions import CogniteAPIError
 
 from configs import FunctionConfig
 from exceptions import FunctionDeployError
-from utils import retrieve_dataset, retry_call, temporary_chdir
+from utils import retrieve_dataset, retry_call
 
 logger = logging.getLogger(__name__)
-
-
-def _write_files_to_zip_buffer(zf: ZipFile, directory: Path):
-    for dirpath, _, files in os.walk(directory):
-        zf.write(dirpath)
-        for f in files:
-            zf.write(Path(dirpath) / f)
 
 
 def _await_file_upload_status(client: CogniteClient, file_id: int, xid: str):
@@ -62,13 +55,14 @@ def zip_and_upload_folder(client: CogniteClient, fn_config: FunctionConfig, xid:
     logger.info(f"Uploading code from '{fn_config.function_folder}' to Files using external ID: '{xid}'")
     buf = io.BytesIO()  # TempDir, who needs that?! :rocket:
     with ZipFile(buf, mode="a") as zf:
-        with temporary_chdir(fn_config.function_folder):
-            _write_files_to_zip_buffer(zf, directory=Path())
+        # for dir in dirs:
+        function_folder = Path(fn_config.function_folder)
+        for filepath in function_folder.rglob("*"):
+            zf.write(filepath, str(filepath).replace(str(function_folder), ''))
 
-        if (common_folder := fn_config.common_folder) is not None:
-            with temporary_chdir(common_folder.parent):  # Note .parent
-                logger.info(f"- Added common directory: '{common_folder}' to the file/function")
-                _write_files_to_zip_buffer(zf, directory=common_folder)
+        common_folder = Path(fn_config.common_folder)
+        for filepath in common_folder.rglob("*"):
+            zf.write(filepath, f"common/{str(filepath).replace(str(common_folder), '')}")
 
     if (ds_id := fn_config.data_set_id) is not None:
         ds = retrieve_dataset(client, ds_id)

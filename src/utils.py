@@ -26,16 +26,6 @@ YamlFileString = constr(min_length=1, strip_whitespace=True, regex=r"^[\w\- /]+\
 FnFileString = constr(min_length=1, strip_whitespace=True, regex=r"^[\w\- ]+\.(py|js)$")  # noqa: F722
 
 
-@contextmanager
-def temporary_chdir(path: Union[str, Path]):
-    old_path = os.getcwd()
-    os.chdir(path)
-    try:
-        yield
-    finally:
-        os.chdir(old_path)
-
-
 def create_zipfile_name(function_name: str) -> str:
     return function_name.replace("/", "-") + ".zip"  # Forward-slash is not allowed in file names
 
