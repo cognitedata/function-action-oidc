@@ -1,12 +1,10 @@
 import base64
 import json
-import os
 import time
-from contextlib import contextmanager
 from functools import lru_cache, partial
 from inspect import signature
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Dict, Optional
 
 from cognite.client import ClientConfig, CogniteClient
 from cognite.client.config import global_config

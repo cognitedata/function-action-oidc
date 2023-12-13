@@ -1,6 +1,5 @@
 import io
 import logging
-import os
 import time
 from pathlib import Path
 from zipfile import ZipFile
@@ -55,14 +54,16 @@ def zip_and_upload_folder(client: CogniteClient, fn_config: FunctionConfig, xid:
     logger.info(f"Uploading code from '{fn_config.function_folder}' to Files using external ID: '{xid}'")
     buf = io.BytesIO()  # TempDir, who needs that?! :rocket:
     with ZipFile(buf, mode="a") as zf:
-        # for dir in dirs:
         function_folder = Path(fn_config.function_folder)
         for filepath in function_folder.rglob("*"):
-            zf.write(filepath, str(filepath).replace(str(function_folder), ''))
+            dest_filepath = str(filepath).replace(str(function_folder), "")
+            zf.write(filepath, dest_filepath)
 
-        common_folder = Path(fn_config.common_folder)
-        for filepath in common_folder.rglob("*"):
-            zf.write(filepath, f"common/{str(filepath).replace(str(common_folder), '')}")
+        if fn_config.common_folder:
+            common_folder = Path(fn_config.common_folder)
+            for filepath in common_folder.rglob("*"):
+                dest_filepath = f'common/{str(filepath).replace(str(common_folder), "")}'
+                zf.write(filepath, dest_filepath)
 
     if (ds_id := fn_config.data_set_id) is not None:
         ds = retrieve_dataset(client, ds_id)
