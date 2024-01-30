@@ -21,7 +21,7 @@ NonEmptyStringMax32 = constr(min_length=1, max_length=32, strip_whitespace=True)
 NonEmptyStringMax128 = constr(min_length=1, max_length=128, strip_whitespace=True)
 NonEmptyStringMax500 = constr(min_length=1, max_length=500, strip_whitespace=True)
 YamlFileString = constr(min_length=1, strip_whitespace=True, regex=r"^[\w\- /]+\.ya?ml$")  # noqa: F722
-FnFileString = constr(min_length=1, strip_whitespace=True, regex=r"^[\w\- ]+\.(py|js)$")  # noqa: F722
+FnFileString = constr(min_length=1, strip_whitespace=True, regex=r"^[\w\- ]+\.py$")  # noqa: F722
 
 
 def create_zipfile_name(function_name: str) -> str:
