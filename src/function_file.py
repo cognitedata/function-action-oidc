@@ -56,15 +56,15 @@ def zip_and_upload_folder(client: CogniteClient, fn_config: FunctionConfig, xid:
     with ZipFile(buf, mode="a") as zf:
         function_folder = Path(fn_config.function_folder)
         for filepath in function_folder.rglob("*"):
-            dest_filepath = str(filepath).replace(str(function_folder), '')
+            dest_filepath = str(filepath).replace(str(function_folder), "")
             zf.write(filepath, dest_filepath)
 
         if fn_config.common_folder:
             common_folder = Path(fn_config.common_folder)
-            common_parents = str(common_folder.parents[0])
+            common_parents = str(common_folder.parents[0]) if str(common_folder.parents[0]) != "." else ""
             logger.info(f"Adding common folder '{common_folder}' to '{str(common_folder).replace(common_parents, '')}'")
             for filepath in common_folder.rglob("*"):
-                dest_filepath = str(filepath).replace(common_parents, '')
+                dest_filepath = str(filepath).replace(common_parents, "")
                 zf.write(filepath, dest_filepath)
 
     if (ds_id := fn_config.data_set_id) is not None:

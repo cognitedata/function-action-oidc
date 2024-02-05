@@ -1,7 +1,7 @@
 # Deploy Cognite Function action
 This action deploys a Python function to Cognite Functions, optionally with schedule(s).
 
-## Inputs 
+## Inputs
 
 ### Required
 | Parameter | Description
