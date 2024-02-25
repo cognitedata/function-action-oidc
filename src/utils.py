@@ -1,12 +1,10 @@
 import base64
 import json
-import os
 import time
-from contextlib import contextmanager
 from functools import lru_cache, partial
 from inspect import signature
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Dict, Optional
 
 from cognite.client import ClientConfig, CogniteClient
 from cognite.client.config import global_config
@@ -24,16 +22,6 @@ NonEmptyStringMax128 = constr(min_length=1, max_length=128, strip_whitespace=Tru
 NonEmptyStringMax500 = constr(min_length=1, max_length=500, strip_whitespace=True)
 YamlFileString = constr(min_length=1, strip_whitespace=True, regex=r"^[\w\- /]+\.ya?ml$")  # noqa: F722
 FnFileString = constr(min_length=1, strip_whitespace=True, regex=r"^[\w\- ]+\.py$")  # noqa: F722
-
-
-@contextmanager
-def temporary_chdir(path: Union[str, Path]):
-    old_path = os.getcwd()
-    os.chdir(path)
-    try:
-        yield
-    finally:
-        os.chdir(old_path)
 
 
 def create_zipfile_name(function_name: str) -> str:

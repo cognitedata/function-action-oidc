@@ -1,6 +1,5 @@
 import io
 import logging
-import os
 import time
 from pathlib import Path
 from zipfile import ZipFile
@@ -11,16 +10,9 @@ from cognite.client.exceptions import CogniteAPIError
 
 from configs import FunctionConfig
 from exceptions import FunctionDeployError
-from utils import retrieve_dataset, retry_call, temporary_chdir
+from utils import retrieve_dataset, retry_call
 
 logger = logging.getLogger(__name__)
-
-
-def _write_files_to_zip_buffer(zf: ZipFile, directory: Path):
-    for dirpath, _, files in os.walk(directory):
-        zf.write(dirpath)
-        for f in files:
-            zf.write(Path(dirpath) / f)
 
 
 def _await_file_upload_status(client: CogniteClient, file_id: int, xid: str):
@@ -62,13 +54,18 @@ def zip_and_upload_folder(client: CogniteClient, fn_config: FunctionConfig, xid:
     logger.info(f"Uploading code from '{fn_config.function_folder}' to Files using external ID: '{xid}'")
     buf = io.BytesIO()  # TempDir, who needs that?! :rocket:
     with ZipFile(buf, mode="a") as zf:
-        with temporary_chdir(fn_config.function_folder):
-            _write_files_to_zip_buffer(zf, directory=Path())
+        function_folder = Path(fn_config.function_folder)
+        for filepath in function_folder.rglob("*"):
+            dest_filepath = str(filepath).replace(str(function_folder), "")
+            zf.write(filepath, dest_filepath)
 
-        if (common_folder := fn_config.common_folder) is not None:
-            with temporary_chdir(common_folder.parent):  # Note .parent
-                logger.info(f"- Added common directory: '{common_folder}' to the file/function")
-                _write_files_to_zip_buffer(zf, directory=common_folder)
+        if fn_config.common_folder:
+            common_folder = Path(fn_config.common_folder)
+            common_parents = str(common_folder.parents[0]) if str(common_folder.parents[0]) != "." else ""
+            logger.info(f"Adding common folder '{common_folder}' to '{str(common_folder).replace(common_parents, '')}'")
+            for filepath in common_folder.rglob("*"):
+                dest_filepath = str(filepath).replace(common_parents, "")
+                zf.write(filepath, dest_filepath)
 
     if (ds_id := fn_config.data_set_id) is not None:
         ds = retrieve_dataset(client, ds_id)
