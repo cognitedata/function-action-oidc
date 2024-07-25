@@ -15,7 +15,6 @@ from defaults import (
     DEFAULT_REMOVE_ONLY,
 )
 from utils import (
-    FnFileString,
     NonEmptyString,
     NonEmptyStringMax32,
     NonEmptyStringMax128,

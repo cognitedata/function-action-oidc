@@ -54,7 +54,7 @@ class TestFunctionConfig:
             "version": "1.0.0",
             "versioned": "true",
             "released": "2022-09-14",
-            f"key_{'0'*32}": r"¯\_(ツ)_/¯",
+            f"key_{'0' * 32}": r"¯\_(ツ)_/¯",
         }
         metadata_json = json.dumps(metadata, indent=0, separators=(",", ":"))
 
