@@ -160,7 +160,7 @@ class FunctionConfig(GithubActionModel):
     function_external_id: NonEmptyString
     function_folder: Path
     function_secrets: Optional[Dict[str, str]]
-    function_file: FnFileString = DEFAULT_FUNCTION_FILE
+    function_file: str = DEFAULT_FUNCTION_FILE
     function_deploy_timeout: NonNegativeInt = DEFAULT_FUNCTION_DEPLOY_TIMEOUT
     common_folder: Optional[Path]
     post_deploy_cleanup: bool = DEFAULT_POST_DEPLOY_CLEANUP
@@ -195,6 +195,20 @@ class FunctionConfig(GithubActionModel):
             "index_url": index_url,
             "extra_index_urls": extra_index_urls,
         }
+
+    @validator("function_file", pre=True)
+    def validate_function_file(cls, value):
+        if value is None:
+            return value
+
+        try:
+            file_path = Path(value)
+        except Exception as e:
+            raise ValueError(f"Invalid function file path: '{value}'") from e
+
+        if file_path.suffix != ".py":
+            raise ValueError(f"Invalid function file extension: '{file_path}', must be '.py'")
+        return str(file_path)
 
     @validator("function_secrets", pre=True)
     def validate_and_parse_secret(cls, value):
