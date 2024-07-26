@@ -43,7 +43,9 @@ inputs:
         description: Path to the folder where the source code for the function(s) can be found.
         required: false
     function_file:
-        description: Name of function file inside function folder, for instance, handler.py.
+        description: |
+            Relative path to the function file inside function folder, for example: 'nested/handler.py'. Defaults
+            to 'handler.py' in the root of the function folder if not provided.
         required: false
     function_secrets:
         description: Base64 encoded string of secrets in JSON format. See README/secrets.

@@ -22,7 +22,7 @@ This action deploys a Python function to Cognite Functions, optionally with sche
 All optional parameters that has default values, can be found in `src/defaults.py`, i.e. they are *not* defined in `action.yaml` because of the typical multi-deploy-pattern used with this action.
 1. `remove_only`: **Short-cut**: Deletes function along with all attached schedules. Ignores most other parameters!
 1. `common_folder`:  The path to the folder containing code that is shared between functions. See section below for more details. *Note: Must be a root folder*
-1. `function_file`: The name of the file with your main function. Will default to `handler.py` if not given.
+1. `function_file`: The relative path to the function file inside function folder that contains your main function (for example: `nested/handler.py`). Defaults to `handler.py` if not provided, which assumes your file is in the root of the `function_folder` provided.
 1. `function_secrets`: The *name* of a Github secret that holds the base64-encoded JSON dictionary with secrets (see "secrets section").
 1. `function_deploy_timeout`: The timeout limit (in seconds) for the function deployment. Once the timeout is reached, the deployment is canceled (an attempt to delete the function will be made).
 1. `data_set_id`: Data set ID to use for the file uploaded to CDF (the function-associated file: *zipped code folder*). Requires two *additional* DEPLOYMENT capabilities: 'dataset:READ' and 'files:WRITE' scoped to *either* the dataset you are going to use, or 'all'. Note: If your data set is WRITE PROTECTED, you also need to add the capability 'dataset:OWNER' for it. Read more about data sets in the official documentation: [Data sets](https://docs.cognite.com/cdf/data_governance/concepts/datasets/)
