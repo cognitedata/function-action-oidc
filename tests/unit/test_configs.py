@@ -105,7 +105,7 @@ class TestFunctionConfig:
         assert fc.function_folder == tmp_func_dir
         assert fc.function_file == "handler.py"
 
-    @pytest.mark.parametrize("test_func_file", ["main.py", "foo/main.py", "foo/bar/main.py", "foo/bar/baz/main.py"])
+    @pytest.mark.parametrize("test_func_file", ["main.py", "foo/ma-in.py", "foo/bar/ma_in.py", "foo/bar/baz/main8.py"])
     def test_from_env_vars_function_file(self, gh_actions_env, monkeypatch, tmp_path, test_func_file):
         from configs import FunctionConfig
 
