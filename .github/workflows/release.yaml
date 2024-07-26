@@ -1,7 +1,7 @@
 on:
   push:
     tags:
-      - 'release/*'
+      - "release/*"
 
 name: Release
 defaults:
@@ -10,43 +10,47 @@ defaults:
 
 jobs:
   publish_to_dockerhub:
+    environment:
+      name: CD
+
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     steps:
-    - name: "Checkout repository"
-      uses: actions/checkout@v2
+      - name: "Checkout repository"
+        uses: actions/checkout@v2
 
-    - name: "Set up Docker Buildx"
-      uses: docker/setup-buildx-action@v2
-      with:
-        install: true
+      - name: "Set up Docker Buildx"
+        uses: docker/setup-buildx-action@v2
+        with:
+          install: true
 
-    - name: "Log in to the Container registry"
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKERHUB_USER }}
-        password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
+      - name: "Log in to the Container registry"
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
 
-    - id: parse_version
-      name: "Parse version from ref"
-      run: | # Returns the last component of the ref path, e.g. 'refs/tags/release/1.2.3-beta' -> '1.2.3-beta'
-        $version = split-path -leaf $env:GITHUB_REF_NAME
-        echo "version=$version" >> $env:GITHUB_OUTPUT
+      - id: parse_version
+        name: "Parse version from ref"
+        run:
+          | # Returns the last component of the ref path, e.g. 'refs/tags/release/1.2.3-beta' -> '1.2.3-beta'
+          $version = split-path -leaf $env:GITHUB_REF_NAME
+          echo "version=$version" >> $env:GITHUB_OUTPUT
 
-    - name: "Build and push Docker image for Azure Pipelines"
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        push: true
-        file: ./Dockerfile-azure-pipelines
-        tags: cognite/function-action:${{ steps.parse_version.outputs.version }}-azure
+      - name: "Build and push Docker image for Azure Pipelines"
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          file: ./Dockerfile-azure-pipelines
+          tags: cognite/function-action:${{ steps.parse_version.outputs.version }}-azure
 
-    - name: "Build and push Docker image for Github Actions"
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        push: true
-        file: ./Dockerfile-github-actions
-        tags: cognite/function-action:${{ steps.parse_version.outputs.version }}-github
+      - name: "Build and push Docker image for Github Actions"
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          file: ./Dockerfile-github-actions
+          tags: cognite/function-action:${{ steps.parse_version.outputs.version }}-github
