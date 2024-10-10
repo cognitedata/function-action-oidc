@@ -27,4 +27,10 @@ def upload_and_create_function(client: CogniteClient, fn_config: FunctionConfig)
 
     file_id = zip_and_upload_folder(client, fn_config, file_xid)
     fn_under_deployment = create_function(client, file_id, fn_config)
-    return await_function_deployment(fn_under_deployment, fn_config.function_deploy_timeout)
+    if fn_config.await_deployment_success:
+        return await_function_deployment(fn_under_deployment, fn_config.function_deploy_timeout)
+    logger.info(
+        f"Awaiting successful deployment of function '{fn_xid}' was skipped (await_deployment_success=True)! "
+        "Remember to manually verify that the function deployed successfully!"
+    )
+    return fn_under_deployment

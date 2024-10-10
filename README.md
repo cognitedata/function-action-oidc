@@ -27,6 +27,7 @@ All optional parameters that has default values, can be found in `src/defaults.p
 1. `function_deploy_timeout`: The timeout limit (in seconds) for the function deployment. Once the timeout is reached, the deployment is canceled (an attempt to delete the function will be made).
 1. `data_set_id`: Data set ID to use for the file uploaded to CDF (the function-associated file: *zipped code folder*). Requires two *additional* DEPLOYMENT capabilities: 'dataset:READ' and 'files:WRITE' scoped to *either* the dataset you are going to use, or 'all'. Note: If your data set is WRITE PROTECTED, you also need to add the capability 'dataset:OWNER' for it. Read more about data sets in the official documentation: [Data sets](https://docs.cognite.com/cdf/data_governance/concepts/datasets/)
 1. `post_deploy_cleanup`: Delete the code file object from CDF Files after successful Function deployment. Defaults to true.
+1. `await_deployment_success`: Await function deployment to verify it was successful. Defaults to true. Set to false to "fire and forget" (you will need to manually verify deployments!)
 1. `description`: Additional field to describe the function.
 1. `owner`: Additional field to describe the function owner.
 1. `env_vars`: Environment variables for your function. Accepts JSON with string key/value pairs, like `{"FOO_BAR": "baz", "another_env_var": "cool"}`.
