@@ -80,7 +80,7 @@ inputs:
         required: false
     await_deployment_success:
         description: |
-            If true (the default), the function deployment will be awaited to verify a successfully deployment.
+            If true (the default), the function deployment will be awaited to verify a successful deployment.
             Pass false to skip this check entirely. Warning: You will then need to manually verify the deployment!
         required: false
     cpu:
