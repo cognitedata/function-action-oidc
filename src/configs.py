@@ -9,6 +9,7 @@ from yaml import safe_load  # type: ignore
 
 from access import verify_deploy_capabilites, verify_schedule_creds_capabilities
 from defaults import (
+    DEFAULT_AWAIT_DEPLOYMENT_SUCCESS,
     DEFAULT_FUNCTION_DEPLOY_TIMEOUT,
     DEFAULT_FUNCTION_FILE,
     DEFAULT_POST_DEPLOY_CLEANUP,
@@ -164,6 +165,7 @@ class FunctionConfig(GithubActionModel):
     function_deploy_timeout: NonNegativeInt = DEFAULT_FUNCTION_DEPLOY_TIMEOUT
     common_folder: Optional[Path]
     post_deploy_cleanup: bool = DEFAULT_POST_DEPLOY_CLEANUP
+    await_deployment_success: bool = DEFAULT_AWAIT_DEPLOYMENT_SUCCESS
     data_set_id: Optional[int]
     cpu: Optional[NonNegativeFloat]
     memory: Optional[NonNegativeFloat]

@@ -78,6 +78,11 @@ inputs:
             If true (the default), the function zip-file uploaded to CDF Files will be
             deleted after the Function has been successfully created.
         required: false
+    await_deployment_success:
+        description: |
+            If true (the default), the function deployment will be awaited to verify a successful deployment.
+            Pass false to skip this check entirely. Warning: You will then need to manually verify the deployment!
+        required: false
     cpu:
         description: 'Set number of CPU cores per function, e.g. 0.5.'
         required: false
