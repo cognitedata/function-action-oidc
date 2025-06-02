@@ -27,6 +27,7 @@ humanize = ">=4.4"
 pre-commit = ">=2.21"
 decorator = ">=5.1"
 cognite-sdk = {version = "^6", extras = ["functions"]}
+tenacity = "^9.1.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=7.2"
