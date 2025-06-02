@@ -2,6 +2,7 @@ import logging
 import time
 from contextlib import suppress
 
+import tenacity
 from cognite.client import CogniteClient
 from cognite.client.data_classes import Function
 from cognite.client.exceptions import CogniteAPIError, CogniteNotFoundError
@@ -19,10 +20,38 @@ class FunctionStatus:
     READY = "Ready"
 
 
+class RetryCogniteAPIError(tenacity.retry_base):
+    TRANSIENT_API_ERRORS = {
+        502,
+    }
+
+    def _predicate(self, exception: BaseException) -> bool:
+        return isinstance(exception, CogniteAPIError) and exception.code in self.TRANSIENT_API_ERRORS
+
+    def __call__(self, retry_state: tenacity.RetryCallState) -> bool:
+
+        if retry_state.outcome and retry_state.outcome.failed:
+            exception = retry_state.outcome.exception()
+            if exception is not None:
+                return self._predicate(exception)
+
+        return False
+
+
+@tenacity.retry(
+    wait=tenacity.wait_exponential(multiplier=1, min=2, max=60),
+    stop=tenacity.stop_after_attempt(5),
+    retry=RetryCogniteAPIError(),
+    reraise=True,
+)
+def update_function_status_with_retry(fn: Function) -> None:
+    fn.update()
+
+
 def await_function_deployment(fn: Function, function_deploy_timeout: int) -> Function:
-    deploy_time = time.time()
+    deploy_time = int(time.time())
     next_info_log = deploy_time + 90  # Log progress every 90 sec
-    while (now := time.time()) <= deploy_time + function_deploy_timeout:
+    while (now := int(time.time())) <= deploy_time + function_deploy_timeout:
         elapsed_time = precisedelta(now - deploy_time)
         if fn.status == FunctionStatus.READY:
             logger.info(f"Function deployment successful! Deployment took {elapsed_time}")
@@ -38,7 +67,8 @@ def await_function_deployment(fn: Function, function_deploy_timeout: int) -> Fun
             logger.info(f"- Deployment in progress, current status: '{fn.status}', time elapsed: {elapsed_time}")
 
         time.sleep(5)
-        fn.update()
+
+        update_function_status_with_retry(fn=fn)
 
     # Attempt to cancel deployment because of timeout:
     with suppress(CogniteAPIError, CogniteNotFoundError):
