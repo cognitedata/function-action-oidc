@@ -119,34 +119,6 @@ inputs:
             implications of using the extra_index_urls option. Accepts JSON encoded list of strings,
             for example: '["http://foo.bar", "https://bar.baz"]'
         required: false
-    startup_delay_max:
-        description: |
-            Maximum random delay in seconds applied at startup for rate limiting. Set to 0 to disable.
-            Recommended: 60-90 seconds for large deployments (40+ functions).
-        required: false
-    operation_delay:
-        description: |
-            Delay in seconds between deployment operations to help with rate limiting.
-            Default is 3 seconds.
-        required: false
-    retry_attempts:
-        description: |
-            Number of retry attempts for the main deployment function.
-            Default is 2. Set to 1 to disable retries.
-        required: false
-    retry_base_delay:
-        description: |
-            Base delay in seconds for retry attempts. Default is 5 seconds.
-        required: false
-    retry_backoff:
-        description: |
-            Backoff multiplier for retry delays. Default is 2.
-        required: false
-    create_function_retry_attempts:
-        description: |
-            Number of retry attempts specifically for the create function API call.
-            Default is 3. Set to 1 to disable retries.
-        required: false
 outputs:
     function_external_id:
         description: The external ID of the function.
