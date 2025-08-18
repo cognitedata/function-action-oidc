@@ -1,5 +1,5 @@
 name: Function Action OIDC
-description: Deploy a Cognite Function with schedules using OIDC
+description: "[DEPRECATED] Deploy a Cognite Function with schedules using OIDC - Use Cognite Data Function Toolkit instead"
 inputs:
     deployment_client_secret:
         description: Client secret to be used for deployment of the function.
